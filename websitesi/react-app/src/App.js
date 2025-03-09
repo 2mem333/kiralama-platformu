@@ -1,12 +1,11 @@
-import './App.css';
-import GirisFormu from './GirisFormu'; 
+//import './App.css';
+import AuthContainer from './AuthContainer'; 
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Hoş Geldiniz!</h1>
-        <GirisFormu /> {/* LoginForm bileşenini buraya ekleyin */}
+        <AuthContainer /> {/* LoginForm bileşenini buraya ekleyin */}
       </header>
     </div>
   );

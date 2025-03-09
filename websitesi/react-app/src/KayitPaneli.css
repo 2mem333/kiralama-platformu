@@ -1,0 +1,226 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f5f9f5;
+  color: #333;
+}
+
+.kayit-konteyner {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #e8f5e9;
+}
+
+.kayit-kart {
+  width: 100%;
+  max-width: 500px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 120, 60, 0.1);
+  padding: 32px;
+}
+
+.kayit-baslik {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.kayit-baslik h1 {
+  font-size: 28px;
+  font-weight: bold;
+  color: #2e7d32;
+  margin-bottom: 8px;
+}
+
+.kayit-baslik p {
+  color: #66bb6a;
+  font-size: 16px;
+}
+
+.hata-mesaji {
+  display: flex;
+  align-items: center;
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.basarili-mesaj {
+  display: flex;
+  align-items: center;
+  background-color: #fdf7f8;
+  color: #89e280;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.hata-ikonu {
+  margin-right: 10px;
+}
+
+.form-satiri {
+  margin-bottom: 16px;
+}
+
+.form-grup {
+  margin-bottom: 6px;
+}
+
+.form-grup label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #388e3c;
+}
+
+.girdi-kapsayici {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.girdi-kapsayici input,
+.girdi-kapsayici textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #c8e6c9;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: all 0.2s ease-in-out;
+  background-color: #f9fff9;
+}
+
+.girdi-kapsayici textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.girdi-kapsayici input.sifre-girdisi {
+  padding-right: 70px; /* Göster/Gizle butonu için yer açıyoruz */
+}
+
+.girdi-kapsayici input:focus,
+.girdi-kapsayici textarea:focus {
+  outline: none;
+  border-color: #66bb6a;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+  background-color: #ffffff;
+}
+
+.sifre-goster {
+  position: absolute;
+  right: 12px;
+  background-color: #e8f5e9;
+  border: none;
+  color: #388e3c;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sifre-goster:hover {
+  background-color: #c8e6c9;
+}
+
+.kayit-buton {
+  width: 100%;
+  padding: 14px;
+  background-color: #43a047;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 12px;
+}
+
+.kayit-buton:hover:not(:disabled) {
+  background-color: #2e7d32;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.kayit-buton:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.kayit-buton:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.yukleniyor-yazi {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.yukleniyor-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+      transform: rotate(360deg);
+  }
+}
+
+.giris-link {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 15px;
+  color: #757575;
+}
+
+.giris-link button {
+  background: none;
+  border: none;
+  color: #43a047;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.giris-link button:hover {
+  color: #2e7d32;
+  text-decoration: underline;
+}
+
+/* Mobil cihazlar için ek düzenlemeler */
+@media (max-width: 480px) {
+  .kayit-kart {
+    padding: 24px;
+  }
+  
+  .sifre-goster {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
