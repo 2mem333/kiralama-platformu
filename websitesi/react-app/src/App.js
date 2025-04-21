@@ -1,14 +1,20 @@
-import './App.css';
-import GirisFormu from './GirisFormu'; 
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import AnaSayfa from './AnaSayfa';
+import GirisPaneli from './GirisPaneli';
+import KayitPaneli from './KayitPaneli';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Hoş Geldiniz!</h1>
-        <GirisFormu /> {/* LoginForm bileşenini buraya ekleyin */}
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        {/* "/" adresine girince otomatik olarak "/anasayfa"ya yönlendir */}
+        <Route path="/" element={<Navigate to="/anasayfa" />} />
+        <Route path="/anasayfa" element={<AnaSayfa />} />
+        <Route path="/giris" element={<GirisPaneli />} />
+        <Route path="/kayit" element={<KayitPaneli />} />
+      </Routes>
+    </Router>
   );
 }
 
