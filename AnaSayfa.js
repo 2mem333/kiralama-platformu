@@ -75,7 +75,127 @@ const tumIlanlar = [
     tarih: "2 hafta önce",
     favoriSayisi: 5,
     kategori: "Mobilya"
-  } 
+  }, 
+  {
+    id: 7,
+    baslik: "IKEA Yatak ve Baza",
+    fiyat: 2600,
+    lokasyon: "İzmir, Bornova",
+    resim: "/yatak.webp",
+    durum: "İkinci El",
+    aciklama: "IKEA'dan alınma çift kişilik yatak ve baza. 4 yıllık fakat temiz ve bakımlı.",
+    tarih: "2 hafta önce",
+    favoriSayisi: 5,
+    kategori: "Mobilya"
+  }, 
+  {
+    id: 8,
+    baslik: "IKEA Yatak ve Baza",
+    fiyat: 2600,
+    lokasyon: "İzmir, Bornova",
+    resim: "/yatak.webp",
+    durum: "İkinci El",
+    aciklama: "IKEA'dan alınma çift kişilik yatak ve baza. 4 yıllık fakat temiz ve bakımlı.",
+    tarih: "2 hafta önce",
+    favoriSayisi: 5,
+    kategori: "Mobilya"
+  }, 
+  {
+    id: 9,
+    baslik: "IKEA Yatak ve Baza",
+    fiyat: 2600,
+    lokasyon: "İzmir, Bornova",
+    resim: "/yatak.webp",
+    durum: "İkinci El",
+    aciklama: "IKEA'dan alınma çift kişilik yatak ve baza. 4 yıllık fakat temiz ve bakımlı.",
+    tarih: "2 hafta önce",
+    favoriSayisi: 5,
+    kategori: "Mobilya"
+  }, 
+  {
+    id: 10,
+    baslik: "IKEA Yatak ve Baza",
+    fiyat: 2600,
+    lokasyon: "İzmir, Bornova",
+    resim: "/yatak.webp",
+    durum: "İkinci El",
+    aciklama: "IKEA'dan alınma çift kişilik yatak ve baza. 4 yıllık fakat temiz ve bakımlı.",
+    tarih: "2 hafta önce",
+    favoriSayisi: 5,
+    kategori: "Mobilya"
+  }, 
+  {
+    id: 11,
+    baslik: "IKEA Yatak ve Baza",
+    fiyat: 2600,
+    lokasyon: "İzmir, Bornova",
+    resim: "/yatak.webp",
+    durum: "İkinci El",
+    aciklama: "IKEA'dan alınma çift kişilik yatak ve baza. 4 yıllık fakat temiz ve bakımlı.",
+    tarih: "2 hafta önce",
+    favoriSayisi: 5,
+    kategori: "Mobilya"
+  }, 
+  {
+    id: 12,
+    baslik: "IKEA Yatak ve Baza",
+    fiyat: 2600,
+    lokasyon: "İzmir, Bornova",
+    resim: "/yatak.webp",
+    durum: "İkinci El",
+    aciklama: "IKEA'dan alınma çift kişilik yatak ve baza. 4 yıllık fakat temiz ve bakımlı.",
+    tarih: "2 hafta önce",
+    favoriSayisi: 5,
+    kategori: "Mobilya"
+  }, 
+  {
+    id: 13,
+    baslik: "IKEA Yatak ve Baza",
+    fiyat: 2600,
+    lokasyon: "İzmir, Bornova",
+    resim: "/yatak.webp",
+    durum: "İkinci El",
+    aciklama: "IKEA'dan alınma çift kişilik yatak ve baza. 4 yıllık fakat temiz ve bakımlı.",
+    tarih: "2 hafta önce",
+    favoriSayisi: 5,
+    kategori: "Mobilya"
+  }, 
+  {
+    id: 14,
+    baslik: "IKEA Yatak ve Baza",
+    fiyat: 2600,
+    lokasyon: "İzmir, Bornova",
+    resim: "/yatak.webp",
+    durum: "İkinci El",
+    aciklama: "IKEA'dan alınma çift kişilik yatak ve baza. 4 yıllık fakat temiz ve bakımlı.",
+    tarih: "2 hafta önce",
+    favoriSayisi: 5,
+    kategori: "Mobilya"
+  }, 
+  {
+    id: 15,
+    baslik: "IKEA Yatak ve Baza",
+    fiyat: 2600,
+    lokasyon: "İzmir, Bornova",
+    resim: "/yatak.webp",
+    durum: "İkinci El",
+    aciklama: "IKEA'dan alınma çift kişilik yatak ve baza. 4 yıllık fakat temiz ve bakımlı.",
+    tarih: "2 hafta önce",
+    favoriSayisi: 5,
+    kategori: "Mobilya"
+  }, 
+  {
+    id: 16,
+    baslik: "IKEA Yatak ve Baza",
+    fiyat: 2600,
+    lokasyon: "İzmir, Bornova",
+    resim: "/yatak.webp",
+    durum: "İkinci El",
+    aciklama: "IKEA'dan alınma çift kişilik yatak ve baza. 4 yıllık fakat temiz ve bakımlı.",
+    tarih: "2 hafta önce",
+    favoriSayisi: 5,
+    kategori: "Mobilya"
+  }, 
 ];
 
 const placeholderImage = "https://via.placeholder.com/300x200?text=Ürün+Görseli";
@@ -120,6 +240,10 @@ const AnaSayfa = () => {
   const [detayliIlan, setDetayliIlan] = useState(null);
   const [siralama, setSiralama] = useState('en-yeni');
   const [sidebarAcik, setSidebarAcik] = useState(true);
+  
+  // Sayfalama için state'ler
+  const [sayfaBasiIlanSayisi, setSayfaBasiIlanSayisi] = useState(20);
+  const [aktifSayfa, setAktifSayfa] = useState(1);
 
   const getImageUrl = (resimYolu) => {
     if (!resimYolu) {
@@ -144,7 +268,17 @@ const AnaSayfa = () => {
     return sonuclar;
   };
 
-  const sonucIlanlar = filtreliVeSiraliIlanlar();
+  // Tüm filtrelenmiş ve sıralanmış ilanları al
+  const tumFiltreliIlanlar = filtreliVeSiraliIlanlar();
+  
+  // Toplam sayfa sayısını hesapla
+  const toplamSayfaSayisi = Math.ceil(tumFiltreliIlanlar.length / sayfaBasiIlanSayisi);
+  
+  // Mevcut sayfa için ilanları al (pagination)
+  const mevcutSayfaIlanlari = tumFiltreliIlanlar.slice(
+    (aktifSayfa - 1) * sayfaBasiIlanSayisi,
+    aktifSayfa * sayfaBasiIlanSayisi
+  );
 
   const ilanDetayiniGoster = (ilan) => {
     setDetayliIlan(ilan);
@@ -160,6 +294,7 @@ const AnaSayfa = () => {
 
   const kategoriDegistir = (yeniKategori) => {
     setSeciliKategori(yeniKategori);
+    setAktifSayfa(1); // Kategori değiştiğinde ilk sayfaya dön
   };
 
   const toggleSidebar = () => {
@@ -168,6 +303,77 @@ const AnaSayfa = () => {
 
   const handleAramaChange = (event) => {
     setAramaMetni(event.target.value);
+    setAktifSayfa(1); // Arama kriteri değiştiğinde ilk sayfaya dön
+  };
+
+  // Sayfa değiştirme fonksiyonu
+  const sayfaDegistir = (sayfaNo) => {
+    if (sayfaNo < 1) {
+      setAktifSayfa(1);
+    } else if (sayfaNo > toplamSayfaSayisi) {
+      setAktifSayfa(toplamSayfaSayisi);
+    } else {
+      setAktifSayfa(sayfaNo);
+    }
+    // Sayfa değiştiğinde sayfanın üstüne kaydır
+    window.scrollTo(0, 0);
+  };
+
+  // Sayfalama numaralarını görüntülemek için yardımcı fonksiyon
+  const sayfaNumaralariniGoster = () => {
+    const sayfaNumaralari = [];
+    
+    // En fazla görüntülenecek sayfa numarası sayısı
+    const maxGosterilecekSayfaSayisi = 5;
+    
+    let baslangicSayfasi = Math.max(1, aktifSayfa - Math.floor(maxGosterilecekSayfaSayisi / 2));
+    let bitisSayfasi = Math.min(toplamSayfaSayisi, baslangicSayfasi + maxGosterilecekSayfaSayisi - 1);
+    
+    // Bitiş sayfası maxGosterilecekSayfaSayisi'ndan daha az ise, başlangıç sayfasını ayarla
+    if (bitisSayfasi - baslangicSayfasi + 1 < maxGosterilecekSayfaSayisi) {
+      baslangicSayfasi = Math.max(1, bitisSayfasi - maxGosterilecekSayfaSayisi + 1);
+    }
+    
+    // "İlk Sayfa" butonu
+    if (baslangicSayfasi > 1) {
+      sayfaNumaralari.push(
+        <button 
+          key="first" 
+          className="sayfa-numarasi" 
+          onClick={() => sayfaDegistir(1)}
+        >
+          İlk
+        </button>
+      );
+    }
+    
+    // Sayfa numaraları
+    for (let i = baslangicSayfasi; i <= bitisSayfasi; i++) {
+      sayfaNumaralari.push(
+        <button 
+          key={i} 
+          className={`sayfa-numarasi ${i === aktifSayfa ? 'aktif' : ''}`} 
+          onClick={() => sayfaDegistir(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+    
+    // "Son Sayfa" butonu
+    if (bitisSayfasi < toplamSayfaSayisi) {
+      sayfaNumaralari.push(
+        <button 
+          key="last" 
+          className="sayfa-numarasi" 
+          onClick={() => sayfaDegistir(toplamSayfaSayisi)}
+        >
+          Son
+        </button>
+      );
+    }
+    
+    return sayfaNumaralari;
   };
 
   return (
@@ -201,11 +407,9 @@ const AnaSayfa = () => {
             {sidebarAcik ? '✕' : '☰'} Kategoriler
           </button>
 
-          {/* Arama çubuğu buradan kaldırıldı */}
-
           <div className="results-sort-view">
             <div className="results-sort">
-              <p className="results-count">{sonucIlanlar.length} ilan bulundu</p>
+              <p className="results-count">{tumFiltreliIlanlar.length} ilan bulundu</p>
               <div className="sort-container">
                 <span className="sort-icon">↕️</span>
                 <span className="sort-label">Sırala:</span>
@@ -237,8 +441,8 @@ const AnaSayfa = () => {
           </div>
 
           <div className={`ilan-listesi ${gorunumTipi}`}>
-            {sonucIlanlar.length > 0 ? (
-              sonucIlanlar.map(ilan => (
+            {mevcutSayfaIlanlari.length > 0 ? (
+              mevcutSayfaIlanlari.map(ilan => (
                 <div 
                   key={ilan.id} 
                   className="ilan-karti-yatay"
@@ -286,6 +490,53 @@ const AnaSayfa = () => {
               </div>
             )}
           </div>
+          
+          {/* Sayfalama bileşeni */}
+          {tumFiltreliIlanlar.length > 0 && (
+            <div className="sayfalama-container">
+              <div className="sayfalama-bilgi">
+                Toplam {tumFiltreliIlanlar.length} ilandan {(aktifSayfa - 1) * sayfaBasiIlanSayisi + 1}-
+                {Math.min(aktifSayfa * sayfaBasiIlanSayisi, tumFiltreliIlanlar.length)} arası gösteriliyor
+              </div>
+              <div className="sayfalama-kontroller">
+                <button 
+                  className="sayfa-yon-butonu" 
+                  onClick={() => sayfaDegistir(aktifSayfa - 1)}
+                  disabled={aktifSayfa === 1}
+                >
+                  &lt; Önceki
+                </button>
+                
+                <div className="sayfa-numaralari">
+                  {sayfaNumaralariniGoster()}
+                </div>
+                
+                <button 
+                  className="sayfa-yon-butonu" 
+                  onClick={() => sayfaDegistir(aktifSayfa + 1)}
+                  disabled={aktifSayfa === toplamSayfaSayisi}
+                >
+                  Sonraki &gt;
+                </button>
+              </div>
+              <div className="sayfa-basina-ilan">
+                <label htmlFor="sayfaBasiIlan">Sayfa başına ilan sayısı:</label>
+                <select 
+                  id="sayfaBasiIlan" 
+                  value={sayfaBasiIlanSayisi}
+                  onChange={(e) => {
+                    setSayfaBasiIlanSayisi(Number(e.target.value));
+                    setAktifSayfa(1); // Sayfa başına gösterilecek ilan sayısı değiştiğinde ilk sayfaya dön
+                  }}
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={30}>30</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
+            </div>
+          )}
         </div>
 
         {detayliIlan && (
