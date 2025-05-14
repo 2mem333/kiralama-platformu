@@ -45,6 +45,24 @@ const pool2 = new Pool({
   client_encoding: 'UTF8'
 });
 
+const pool_pd = new Pool({
+  user: 'postgres', //postgre adı
+  host: 'localhost',
+  database: 'profildegerlendirmeleri_db',
+  password: '1337', //postgre sifre
+  port: 5432,
+  client_encoding: 'UTF8'
+});
+
+const pool_profil = new Pool({
+  user: 'postgres', //postgre adı
+  host: 'localhost',
+  database: 'profilonizlemesi_db',
+  password: '1337', //postgre sifre
+  port: 5432,
+  client_encoding: 'UTF8'
+});
+
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -87,8 +105,52 @@ app.post('/api/kayit', async (req, res) => {
   }
 });
 
+app.post('/api/profilidegerlendir', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const result = await pool.query('SELECT * FROM kullanicilar WHERE eposta = $1 AND sifre = $2;', [email, password]);
+
+    if (result.rows.length > 0) { //eger sorgu dogru yanit dondururse.
+      res.status(200).json({ message: 'dogru' });
+    } else {
+      res.status(401).json({ message: 'hatali' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Sunucu hatası!' });
+  }
+});
+
+//kullanicilar
+app.get('/api/profiller', async (req, res) => {
+  let { kullaniciid } = req.query;
+  
+  let query = 'SELECT * FROM kullanicilar';
+  let values = [];
+  let conditions = [];
+
+  if (kullaniciid) {
+    conditions.push(`id = $${values.length + 1}`);
+    values.push(kullaniciid);
+  }
+
+  if (conditions.length) {
+    query += ' WHERE ' + conditions.join(' AND ');
+  }
+
+  try {
+    const result = await pool.query(query, values);
+    //console.log(result.rows);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Veri çekilirken hata oluştu:', error);
+    res.status(500).json({ error: 'Veri çekilirken hata oluştu' });
+  }
+});
+
 app.get('/api/ilanlar', async (req, res) => {
-  let { arama, kategori, siralama,limit,ilanid } = req.query;
+  let { arama, kategori, siralama,limit,ilanid,sahipid } = req.query;
   
   let query = 'SELECT * FROM ilanlar';
   let values = [];
@@ -103,6 +165,11 @@ app.get('/api/ilanlar', async (req, res) => {
   if (ilanid) {
     conditions.push(`ilanid = $${values.length + 1}`);
     values.push(ilanid);
+  }
+
+  if (sahipid) {
+    conditions.push(`sahipid = $${values.length + 1}`);
+    values.push(sahipid);
   }
 
   // Kategori filtresi
@@ -134,6 +201,40 @@ app.get('/api/ilanlar', async (req, res) => {
 
     const result = await pool2.query(query, values);
     res.json(result.rows);
+    console.log(result.rows);
+  } catch (error) {
+    console.error('Veri çekilirken hata oluştu:', error);
+    res.status(500).json({ error: 'Veri çekilirken hata oluştu' });
+  }
+});
+
+app.get('/api/degerlendirmeler', async (req, res) => {
+  let { degerlendirilen_id,limit } = req.query;
+  
+  let query = 'SELECT * FROM degerlendirmeler';
+  let values = [];
+  let conditions = [];
+
+  if (degerlendirilen_id) {
+    conditions.push(`degerlendirilen_id = $${values.length + 1}`);
+    values.push(degerlendirilen_id);
+  }
+
+  // Eğer filtreleme yapıldıysa WHERE ekle
+  if (conditions.length > 0) {
+    query += ` WHERE ${conditions.join(' AND ')}`;
+  }
+
+ if (limit) {
+    query += ` LIMIT $${values.length + 1}`;
+    values.push(limit);  // Limit parametresini values array'ine ekliyoruz
+  }
+
+  try {
+
+    const result = await pool_pd.query(query, values);
+    res.json(result.rows);
+    console.log(result.rows);
   } catch (error) {
     console.error('Veri çekilirken hata oluştu:', error);
     res.status(500).json({ error: 'Veri çekilirken hata oluştu' });
@@ -172,6 +273,35 @@ app.post('/api/ilanolustur', async (req, res) => {
   }
 });
 
+//profil onizlemesi
+app.get('/api/profil', async (req, res) => {
+  let { sahipid } = req.query;
+  
+  let query = 'SELECT * FROM profilonizlemesi';
+  let values = [];
+  let conditions = [];
+
+  if (sahipid) {
+    console.log("aktifff");
+    conditions.push(`sahipid = $${values.length + 1}`);
+    values.push(sahipid);
+  }
+
+  // Eğer filtreleme yapıldıysa WHERE ekle
+  if (conditions.length > 0) {
+    query += ` WHERE ${conditions.join(' AND ')}`;
+  }
+
+  try {
+
+    const result = await pool_profil.query(query, values);
+    res.json(result.rows);
+    console.log(result.rows);
+  } catch (error) {
+    console.error('Veri çekilirken hata oluştu:', error);
+    res.status(500).json({ error: 'Veri çekilirken hata oluştu' });
+  }
+});
 
 app.listen(port,() => {
   console.log(`Server running at http://localhost:${port}`);
