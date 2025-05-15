@@ -1,16 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import UstCubuk2 from './UstCubukProfil';
+import { useNavigate } from 'react-router-dom';
+import './ProfilSayfa.css';
 
 //-----------------------------------JAVASCRIPT KODU BASLANGIC------------------------------------------------
 function Profiller() {
 const { kullaniciid } = useParams();
 const [aktifSekme, setAktifSekme] = useState('hakkimda');
+const [cevaplananYorumId, setCevaplananYorumId] = useState(null);
 const fileInputRef = useRef(null);
 const [selectedFile, setSelectedFile] = useState(null);
-
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState(null);
 const [yukleme, yuklenmeDurumunuAyarla] = useState(true);
 const [hata,hatabelirleme] = useState(null);
+const [yorumCevabi, setYorumCevabi] = useState('');
+const [ilanlar, setIlanlar] = useState([]);
+const [profil, setProfil] = useState({});
+// Yeni ilan düzenleme state
+const [duzenlenenIlan, setDuzenlenenIlan] = useState(null);
+const [ilanBaslik, setIlanBaslik] = useState('');
+const [ilanFiyat, setIlanFiyat] = useState('');
+const navigate = useNavigate();
+const [previewUrl, setPreviewUrl] = useState(null);
+const [currentUserId, setCurrentUserId] = useState(null);
 
 class KullaniciBilgileri {
   constructor() {
@@ -112,11 +126,44 @@ class Ilanlar {
   }
 
 }
+  // Kullanıcının favori ilanları
+    const [favoriIlanlar, setFavoriIlanlar] = useState([
+      {
+        id: 101,
+        baslik: "Retro Koltuk Takımı",
+        fiyat: "6800₺/ay",
+        resim: "/retro-koltuk.jpg",
+        sahibi: "Ayşe Demir"
+      },
+      {
+        id: 102,
+        baslik: "Ahşap Kitaplık",
+        fiyat: "2300₺/ay",
+        resim: "/ahsap-kitaplik.jpg",
+        sahibi: "Mehmet Kaya"
+      }
+    ]);
 
 const [_KULLANICI, fKullanici] = useState(new KullaniciBilgileri()); //KULLANICI BURAYA CEKILIR
 const [_ILANLAR, fIlanlar] = useState([]);
 const [_DEGERLENDIRMELER, fDegerlendirmeler] = useState([]);
 const [_PROFIL, fProfil] = useState(new Profil());
+
+const [yorumlar, setYorumlar] = useState(_DEGERLENDIRMELER);
+
+useEffect(() => {
+  const fetchCurrentUser = async () => {
+    try {
+      const params = new URLSearchParams({ kullaniciid });
+      const res = await fetch(`http://localhost:5000/api/profiller?${params}`);
+      const data = await res.json();
+      setCurrentUserId(data.kullaniciid);
+    } catch (err) {
+      console.error('Kullanıcı bilgisi alınamadı:', err);
+    }
+  };
+  fetchCurrentUser();
+}, []);
 
 useEffect(() => {
     const fetchKullanici = async () => {
@@ -132,10 +179,9 @@ useEffect(() => {
           .degerAta('email', data.eposta)
           .degerAta('ad', data.ad)
           .degerAta('soyad', data.soyad)
-          .degerAta('dogumTarihi', data.dogumTarihi)
+          .degerAta('dogumtarihi', data.dogumtarihi)
           .degerAta('telefonNumarasi', data.telefon)
           .degerAta('adres', data.adres)
-          .degerAta('email', data.eposta);
 
         fKullanici(yeniKullanici);
       } catch (err) {
@@ -146,29 +192,34 @@ useEffect(() => {
     fetchKullanici();
 
     const ilanlari_cek = async () => {
-
-  try {
-    const params = new URLSearchParams({ limit: '3', sahipid: kullaniciid });
-    const res = await fetch(`http://localhost:5000/api/ilanlar?${params}`);
-    if (!res.ok) throw new Error('API yanıtı başarısız');
-
-    // 1) JSON dizisini al
-    const dataArray = await res.json(); 
-
-    // 2) Her bir objeyi Ilanlar sınıfına dönüştür
-    const ilanlarArray = dataArray.map(item =>
-      new Ilanlar()
-        .degerAta('ilanAdi',     item.baslik)
-        .degerAta('gunlukFiyat', item.fiyat)
-        .degerAta('ilanId',      item.ilanid)
-        .degerAta('ilanResim',   item.resim)
-    );
-
-    // 3) Tüm diziyi state’e ata
-    fIlanlar(ilanlarArray);
-  } catch (err) {
-    console.error(err);
-  }
+      try {
+        const params = new URLSearchParams({ limit: '3', sahipid: kullaniciid });
+        const res = await fetch(`http://localhost:5000/api/ilanlar?${params}`);
+        
+        if (!res.ok) throw new Error('API yanıtı başarısız');
+        
+        const dataArray = await res.json();
+        
+        const ilanlarArray = dataArray.map(item => {
+          // Resim alanını JSON string'den array'e çevir
+          let resimler = [];
+          try {
+            resimler = JSON.parse(item.resim.replace(/\\/g, ''));
+          } catch (error) {
+            console.error('Resim parse hatası:', error);
+          }
+          
+          return new Ilanlar()
+            .degerAta('ilanAdi', item.baslik)
+            .degerAta('gunlukFiyat', item.fiyat)
+            .degerAta('ilanId', item.ilanid)
+            .degerAta('ilanResim', resimler) // Array olarak kaydet
+        });
+        
+        fIlanlar(ilanlarArray);
+      } catch (err) {
+        console.error(err);
+      }
     };
    ilanlari_cek();
 
@@ -214,11 +265,17 @@ useEffect(() => {
       } catch (err) {
         console.error(err);
       } finally {
+        setLoading(false);
       }
    }
    profili_cek();
 
   }, [kullaniciid]);
+
+
+    const puanOrtalamasi = (_DEGERLENDIRMELER.length > 0)
+  ? (_DEGERLENDIRMELER.reduce((toplam, d) => toplam + d.puan, 0) / _DEGERLENDIRMELER.length).toFixed(1)
+  : "0.0";
 
 
   const [profilBilgileri, setProfilBilgileri] = useState({
@@ -233,13 +290,16 @@ useEffect(() => {
     dogumTarihi: "15.08.1985"
   });
 
-  // Hakkında bilgileri state
-  const [ayarlarFormu, setAyarlarFormu] = useState({
-    isim: profilBilgileri.isim,
-    email: profilBilgileri.email,
-    telefon: profilBilgileri.telefon,
-    hakkimda: profilBilgileri.hakkimda
-  });
+   // Ayarlar formu state'i güncellendi
+    const [ayarlarFormu, setAyarlarFormu] = useState({
+      isim: _KULLANICI.isim,
+      email: _KULLANICI.email,
+      telefon: _KULLANICI.telefon,
+      hakkimda: _KULLANICI.hakkimda,
+      mevcutSifre: '',
+      yeniSifre: '',
+      yeniSifreTekrar: ''
+    });
 
   // Form değişikliklerini işle
   const handleFormChange = (e) => {
@@ -253,46 +313,108 @@ useEffect(() => {
   // Dosya seçme işlemi
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      // Önizleme için URL oluştur
-      const imageUrl = URL.createObjectURL(file);
-      setProfilBilgileri({
-        ...profilBilgileri,
-        avatar: imageUrl
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAyarlarFormu(prev => ({
+        ...prev,
+        avatar: reader.result // Yeni avatarı base64 olarak kaydet
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Form gönderimi güncellendi
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    let changes = {
+      bilgilerDegisti: false,
+      sifreDegisti: false
+    };
+
+    // Check for profile info changes
+    if (ayarlarFormu.isim !== _KULLANICI.isim || 
+        ayarlarFormu.email !== _KULLANICI.email || 
+        ayarlarFormu.telefon !== _KULLANICI.telefon || 
+        ayarlarFormu.hakkimda !== _KULLANICI.hakkimda) {
+      changes.bilgilerDegisti = true;
+    }
+
+    // Check for password changes
+    if (ayarlarFormu.yeniSifre || ayarlarFormu.mevcutSifre) {
+      if (ayarlarFormu.yeniSifre !== ayarlarFormu.yeniSifreTekrar) {
+        alert('Yeni şifreler eşleşmiyor!');
+        return;
+      }
+      changes.sifreDegisti = true;
+      alert('Şifre başarıyla güncellendi!');
+    }
+
+    // Apply changes
+    if (changes.bilgilerDegisti) {
+      fKullanici({
+        ..._KULLANICI,
+        isim: ayarlarFormu.isim,
+        email: ayarlarFormu.email,
+        telefon: ayarlarFormu.telefon,
+        hakkimda: ayarlarFormu.hakkimda
       });
+    }
+
+    setAyarlarFormu({
+      ...ayarlarFormu,
+      mevcutSifre: '',
+      yeniSifre: '',
+      yeniSifreTekrar: ''
+    });
+
+    if (changes.bilgilerDegisti || changes.sifreDegisti) {
+      alert('Profil bilgileriniz güncellendi!');
     }
   };
 
-  // Form gönderimi
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    // Profil bilgilerini güncelle
-    setProfilBilgileri({
-      ...profilBilgileri,
-      isim: ayarlarFormu.isim,
-      email: ayarlarFormu.email,
-      telefon: ayarlarFormu.telefon,
-      hakkimda: ayarlarFormu.hakkimda
-      // avatar zaten handleFileSelect'te güncelleniyor
+  const [sifreGoster, setSifreGoster] = useState({
+      mevcutSifre: false,
+      yeniSifre: false,
+      yeniSifreTekrar: false
     });
-    alert('Profil bilgileriniz güncellendi!');
-  };
-
-  // Profil fotoğrafını kaldırma işlemi
-  const handleRemoveAvatar = () => {
-    setProfilBilgileri({
-      ...profilBilgileri,
-      avatar: "/profil-avatar.jpg" // Varsayılan avatar görseline geri dön
-    });
-  };
+  
+    // Şifre görünürlüğünü değiştirme
+    const toggleSifreGoster = (field) => {
+      setSifreGoster(prev => ({
+        ...prev,
+        [field]: !prev[field]
+      }));
+    };
+  
+    // Profil fotoğrafını kaldırma işlemi
+    const handleRemoveAvatar = () => {
+      setAyarlarFormu(prev => ({
+        ...prev,
+        avatar: '/varsayilan-avatar.jpg' // Varsayılan avatar yolu
+      }));
+    };
+      
+    // Favori ilan kaldırma
+    const handleFavoriKaldir = (ilanId) => {
+      setFavoriIlanlar(favoriIlanlar.filter(ilan => ilan.id !== ilanId));
+      alert('İlan favorilerinizden kaldırıldı!');
+    };
+  
+    // Favori ilana mesaj gönderme
+    const handleFavoriMesaj = (ilan) => {
+      alert(`${ilan.sahibi} kullanıcısına "${ilan.baslik}" ilanı hakkında mesaj gönderilecek!`);
+    };
 
   // Placeholder görsel URL'si
   const placeholderImage = "https://www.kindpng.com/picc/m/451-4517876_default-profile-hd-png-download.png";
 
   // Görsel URL'sini işleyen fonksiyon
   const getImageUrl = (resimYolu) => {
-    if (!resimYolu) return placeholderImage;
+    if (!resimYolu || resimYolu.length === 0) return placeholderImage;
+    
+    // Firebase URL'leri direkt kullan
     return resimYolu;
   };
 
@@ -303,13 +425,90 @@ useEffect(() => {
     ));
   };
 
+  // İlan düzenleme başlatma
+  const handleIlanDuzenle = (ilan) => {
+    setDuzenlenenIlan(ilan);
+    setIlanBaslik(ilan.baslik);
+    setIlanFiyat(ilan.fiyat);
+  };
+
+  // İlan düzenleme iptal
+  const handleIlanDuzenlemeIptal = () => {
+    setDuzenlenenIlan(null);
+    setIlanBaslik('');
+    setIlanFiyat('');
+  };
+
+  // İlan güncelleme
+  const handleIlanGuncelle = (e) => {
+    e.preventDefault();
+    const guncellenmisIlanlar = ilanlar.map(ilan => {
+      if (ilan.id === duzenlenenIlan.id) {
+        return {
+          ...ilan,
+          baslik: ilanBaslik,
+          fiyat: ilanFiyat
+        };
+      }
+      return ilan;
+    });
+
+    setIlanlar(guncellenmisIlanlar);
+    setDuzenlenenIlan(null);
+    setIlanBaslik('');
+    setIlanFiyat('');
+    alert('İlan başarıyla güncellendi!');
+  };
+
+  // İlan silme
+  const handleIlanSil = (ilanId) => {
+    if (window.confirm('Bu ilanı silmek istediğinize emin misiniz?')) {
+      setIlanlar(ilanlar.filter(ilan => ilan.id !== ilanId));
+      alert('İlan başarıyla silindi!');
+    }
+  };
+
+  // Ana sayfaya dönme fonksiyonu
+  const handleAnaSayfayaDon = () => {
+    navigate('/');
+  };
+
+  {error && (
+    <div className="error-message">
+      Hata: {error} 
+      <button onClick={() => setError(null)}>×</button>
+    </div>
+  )}
+
+  {loading && (
+    <div className="loading-indicator">
+      <div className="spinner"></div>
+      Yükleniyor...
+    </div>
+  )}
 //-----------------------------------JAVASCRIPT KODU BITIS------------------------------------------------
 
 //----------------------------------JSX BLOGU BASLANGIC--------------------------------------
 return (
-  <><UstCubuk2/>
+  <>
+  {loading && (
+      <div className="loading">Yükleniyor...</div>
+    )}
+    {error && (
+      <div className="error">{`Hata: ${error}`} 
+        <button onClick={() => setError(null)}>×</button>
+      </div>
+    )}
+  <UstCubuk2/>
  <div className="profil-container">
       {/* Profil Başlık Alanı */}
+      {/* Ana sayfaya dön butonu */}
+      <button 
+        className="ana-sayfa-btn"
+        onClick={handleAnaSayfayaDon}
+      >
+        <span className="fas fa-home"></span> 🏠︎
+      </button>
       <div className="profil-header">
         <img 
           src={getImageUrl(_PROFIL.avatar)}  
@@ -329,11 +528,15 @@ return (
             <div className="istatistik-baslik">İlan</div>
           </div>
           <div className="istatistik-kutu">
+            <div className="istatistik-deger">{favoriIlanlar.length}</div>
+            <div className="istatistik-baslik">Favori</div>
+          </div>
+          <div className="istatistik-kutu">
             <div className="istatistik-deger">{_DEGERLENDIRMELER.length}</div>
             <div className="istatistik-baslik">Yorum</div>
           </div>
           <div className="istatistik-kutu">
-            <div className="istatistik-deger">PUANLAMA</div>
+            <div className="istatistik-deger">{puanOrtalamasi}</div>
             <div className="istatistik-baslik">Puan</div>
           </div>
         </div>
@@ -369,36 +572,158 @@ return (
         >
           Yorumlar ({_DEGERLENDIRMELER.length})
         </button>
+        {/* Sadece kendi profiline özel sekmeler */}
+        {currentUserId === parseInt(kullaniciid) && (
+          <>
+            <button 
+              className={`sekme-btn ${aktifSekme === 'favoriler' ? 'aktif' : ''}`}
+              onClick={() => setAktifSekme('favoriler')}
+            >
+              Favoriler
+            </button>
+            <button 
+              className={`sekme-btn ${aktifSekme === 'ayarlar' ? 'aktif' : ''}`}
+              onClick={() => setAktifSekme('ayarlar')}
+            >
+              Ayarlar
+            </button>
+          </>
+        )}
       </div>
       
-      {/* Profil İçerik Alanı */}
+       {/* Profil İçerik Alanı */}
       <div className="profil-icerik">
         {/* Hakkında Sekmesi */}
         {aktifSekme === 'hakkimda' && (
           <div className="hakkimda-sekme">
             <h2 className="hakkimda-baslik">Hakkımda</h2>
             <p className="hakkimda-icerik">{_PROFIL.hakkinda}</p>
+
+            <div className="hakkimda-detaylar">
+              <div className="hakkimda-detay">
+                <span className="hakkimda-icon">📱</span>
+                <span className="hakkimda-text">{_KULLANICI.telefonNumarasi}</span>
+              </div>
+              <div className="hakkimda-detay">
+                <span className="hakkimda-icon">✉️</span>
+                <span className="hakkimda-text">{_KULLANICI.email}</span>
+              </div>
+              <div className="hakkimda-detay">
+                <span className="hakkimda-icon">🎂</span>
+                <span className="hakkimda-text">Doğum Tarihi: {_KULLANICI.dogumtarihi}</span>
+              </div>
+            </div>
           </div>
         )}
         
         {/* İlanlar Sekmesi */}
         {aktifSekme === 'ilanlar' && (
           <div className="ilanlar-sekme">
-            <h2 className="hakkimda-baslik">İlanlarım</h2>
+            <div className="ilanlar-baslik-container">
+              <h2 className="hakkimda-baslik">İlanlarım</h2>
+              <button 
+                className="daha-fazla-btn"
+                onClick={() => navigate(`/ilan-yonetimi/${kullaniciid}`)}
+              >
+                İlanları Yönet
+              </button>
+            </div>
             <div className="profil-ilanlar">
               {_ILANLAR.map(ilan => (
                 <div key={ilan.ilanId} className="profil-ilan-karti">
+                  {duzenlenenIlan && duzenlenenIlan.ilanId === ilan.ilanId ? (
+                    <div className="ilan-duzenleme-formu">
+                      <form onSubmit={handleIlanGuncelle}>
+                        <div className="form-grup">
+                          <label>İlan Başlığı</label>
+                          <input
+                            type="text"
+                            value={ilanBaslik}
+                            onChange={(e) => setIlanBaslik(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="form-grup">
+                          <label>Fiyat </label>
+                          <input
+                            type="number"
+                            value={ilanFiyat}
+                            onChange={(e) => setIlanFiyat(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="ilan-duzenleme-butonlar">
+                          <button type="submit" className="duzenleme-kaydet-btn">
+                            Kaydet
+                          </button>
+                          <button 
+                            type="button" 
+                            className="duzenleme-iptal-btn"
+                            onClick={handleIlanDuzenlemeIptal}
+                          >
+                            İptal
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  ) : (
+                    <>
+                      <img 
+                        src={ilan.ilanResim?.[0] || placeholderImage} 
+                        alt={ilan.ilanAdi}
+                        className="profil-ilan-resim"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = placeholderImage;
+                        }}
+                      />
+                      <div className="profil-ilan-bilgi">
+                        <h3 className="profil-ilan-baslik">{ilan.ilanAdi}</h3>
+                        <p className="profil-ilan-fiyat">{ilan.gunlukFiyat} TL</p>
+                        <div className="profil-ilan-tarih">
+                          <span>İlan No: {ilan.ilanId}</span>
+                          <span>♥ {ilan.favoriSayisi || 0}</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Favoriler Sekmesi */}
+        {aktifSekme === 'favoriler' && currentUserId === parseInt(kullaniciid) && (
+          <div className="favoriler-sekme">
+            <h2 className="hakkimda-baslik">Favori İlanlarım</h2>
+            <div className="profil-favoriler">
+              {favoriIlanlar.map(ilan => (
+                <div key={ilan.id} className="profil-ilan-karti">
                   <img 
-                    src={getImageUrl(ilan.ilanResim)} 
-                    alt={ilan.ilanAdi} 
+                    src={getImageUrl(ilan.resim)} 
+                    alt={ilan.baslik} 
                     className="profil-ilan-resim" 
                   />
                   <div className="profil-ilan-bilgi">
-                    <h3 className="profil-ilan-baslik">{ilan.ilanAdi}</h3>
-                    <p className="profil-ilan-fiyat">{ilan.gunlukFiyat} TL</p>
+                    <h3 className="profil-ilan-baslik">{ilan.baslik}</h3>
+                    <p className="profil-ilan-fiyat">{ilan.fiyat} </p>
                     <div className="profil-ilan-tarih">
-                      <span>121212</span>
-                      <span>♥ 5</span>
+                      <span>Satıcı: {ilan.sahibi}</span>
+                    </div>
+                    <div className="favori-ilan-aksiyonlar">
+                      <button 
+                        className="favori-mesaj-btn"
+                        onClick={() => handleFavoriMesaj(ilan)}
+                      >
+                        Mesaj Gönder
+                      </button>
+                      <button 
+                        className="favori-kaldir-btn"
+                        onClick={() => handleFavoriKaldir(ilan.id)}
+                      >
+                        Favorilerden Kaldır
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -407,39 +732,205 @@ return (
           </div>
         )}
         
-
         {/* Yorumlar Sekmesi */}
         {aktifSekme === 'yorumlar' && (
           <div className="yorumlar-sekme">
             <h2 className="hakkimda-baslik">Kullanıcı Yorumları</h2>
             <div className="yorum-listesi">
-              {_DEGERLENDIRMELER.map(degerlendirme => (
-                <div key={degerlendirme.degerlendirenId} className="yorum-karti">
+              {_DEGERLENDIRMELER.map(yorum => (
+                <div key={yorum.degerlendirenId} className="yorum-karti">
                   <div className="yorum-ust">
-                    <img 
-                      src={"FOTO"} 
-                      alt={"FOTO"} 
-                      className="FOTO" 
-                    />
-                    <div>
-                      <h3 className="yorum-yazar">YAZAR</h3>
-                      <p className="yorum-tarih">TARIH</p>
-                    </div>
+                  <img 
+                    src={getImageUrl(yorum.avatar)} 
+                    alt={yorum.yazar} 
+                    className="yorum-avatar" 
+                  />
+                  <div>
+                    <h3 className="yorum-yazar">{yorum.yazar}</h3>
+                    <p className="yorum-tarih">{yorum.tarih}</p>
                   </div>
-                  <div className="yorum-puan">
-                    {renderYildizlar(degerlendirme.puan)}
-                  </div>
-                  <p className="yorum-icerik">{degerlendirme.yorumMetni}</p>
+                </div>
+                <div className="yorum-puan">
+                  {renderYildizlar(yorum.puan)}
+                  {/* Puan değerini sayısal olarak ekleyen kısım */}
+                  <span className="puan-deger">
+                    {Number(yorum.puan).toFixed(1)}/5.0
+                  </span>
+                </div>
+                <p className="yorum-icerik">{yorum.yorumMetni}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
+        
+        {/* Ayarlar Sekmesi */}
+        {aktifSekme === 'ayarlar' && currentUserId === parseInt(kullaniciid) && (
+          <div className="ayarlar-sekme">
+            <h2 className="hakkimda-baslik">Profil Ayarları</h2>
+            <form className="ayarlar-formu" onSubmit={handleFormSubmit}>
+              <div className="avatar-yukle">
+                <img 
+                  src={getImageUrl(_PROFIL.avatar)} 
+                  alt="Profil Önizleme" 
+                  className="avatar-onizleme" 
+                />
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  accept="image/*" 
+                  style={{ display: 'none' }} 
+                  onChange={handleFileSelect}
+                />
+                <button 
+                  type="button" 
+                  className="avatar-sec-btn"
+                  onClick={() => fileInputRef.current.click()}
+                >
+                  Fotoğraf Seç
+                </button>
+                
+                {/* Profil fotoğrafını kaldırma butonu */}
+                <button 
+                  type="button" 
+                  className="avatar-kaldir-btn"
+                  onClick={handleRemoveAvatar}
+                >
+                  Profil Fotoğrafını Kaldır
+                </button>
+              </div>
+              
+              <div className="form-grup">
+                <label className="form-etiket">Ad Soyad</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  name="isim"
+                  value={ayarlarFormu.isim}
+                  onChange={handleFormChange}
+                />
+              </div>
+              
+              <div className="form-grup">
+                <label className="form-etiket">Email</label>
+                <input
+                  type="email"
+                  className="form-input"
+                  name="email"
+                  value={ayarlarFormu.email}
+                  onChange={handleFormChange}
+                />
+              </div>
+              
+              <div className="form-grup">
+                <label className="form-etiket">Telefon</label>
+                <input
+                  type="tel"
+                  className="form-input"
+                  name="telefon"
+                  value={ayarlarFormu.telefon}
+                  onChange={handleFormChange}
+                />
+              </div>
+              
+              <div className="form-grup">
+                <label className="form-etiket">Hakkımda</label>
+                <textarea
+                  className="form-input form-textarea"
+                  name="hakkimda"
+                  value={ayarlarFormu.hakkimda}
+                  onChange={handleFormChange}
+                />
+              </div>
+              <h3 className="sifre-degistir-baslik">Şifre Değiştir</h3>
+            
+            {/* Mevcut Şifre Alanı */}
+            <div className="form-grup">
+              <label className="form-etiket">Mevcut Şifre</label>
+              <div className="sifre-input-wrapper">
+                <input
+                  type={sifreGoster.mevcutSifre ? 'text' : 'password'}
+                  className="form-input"
+                  name="mevcutSifre"
+                  value={ayarlarFormu.mevcutSifre}
+                  onChange={handleFormChange}
+                />
+                <button
+                  type="button"
+                  className="sifre-goster-btn"
+                  onClick={() => toggleSifreGoster('mevcutSifre')}
+                >
+                  {sifreGoster.mevcutSifre ? 'Gizle' : 'Göster'}
+                </button>
+              </div>
+            </div>
+
+            {/* Yeni Şifre Alanı */}
+            <div className="form-grup">
+              <label className="form-etiket">Yeni Şifre</label>
+              <div className="sifre-input-wrapper">
+                <input
+                  type={sifreGoster.yeniSifre ? 'text' : 'password'}
+                  className="form-input"
+                  name="yeniSifre"
+                  value={ayarlarFormu.yeniSifre}
+                  onChange={handleFormChange}
+                />
+                <button
+                  type="button"
+                  className="sifre-goster-btn"
+                  onClick={() => toggleSifreGoster('yeniSifre')}
+                >
+                  {sifreGoster.yeniSifre ? 'Gizle' : 'Göster'}
+                </button>
+              </div>
+            </div>
+
+            {/* Yeni Şifre Tekrar Alanı */}
+            <div className="form-grup">
+              <label className="form-etiket">Yeni Şifre Tekrar</label>
+              <div className="sifre-input-wrapper">
+                <input
+                  type={sifreGoster.yeniSifreTekrar ? 'text' : 'password'}
+                  className="form-input"
+                  name="yeniSifreTekrar"
+                  value={ayarlarFormu.yeniSifreTekrar}
+                  onChange={handleFormChange}
+                />
+                <button
+                  type="button"
+                  className="sifre-goster-btn"
+                  onClick={() => toggleSifreGoster('yeniSifreTekrar')}
+                >
+                  {sifreGoster.yeniSifreTekrar ? 'Gizle' : 'Göster'}
+                </button>
+              </div>
+            </div>
+
+
+              <button type="submit" className="form-buton">
+                Bilgileri Güncelle
+              </button>
+            </form>
+          </div>
+        )}
       </div>
+      {/* Alt Bilgi */}
+      <footer className="profile__footer">
+        <div className="profile__footer-content">
+          <div className="profile__user">
+            <img src={_PROFIL.avatar} alt="Profil" className="profile__avatar-small" />
+            <span>{_PROFIL.isim}</span>
+          </div>
+          <div className="profile__copyright">
+            <span>Son Güncelleme: 25.04.2025</span>
+            <span>© 2025 - Tüm Hakları Saklıdır</span>
+          </div>
+        </div>
+      </footer>
     </div>
-      </>
+    </>
   );
-  
 };
 //----------------------------------JSX BLOGU BITIS--------------------------------------
 export default Profiller;
