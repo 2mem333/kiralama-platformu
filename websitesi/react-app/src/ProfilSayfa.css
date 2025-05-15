@@ -212,9 +212,10 @@
 }
 
 .profil-ilan-resim {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
+  width: 180px;       /* isteğe göre genişlik */
+  height: 120px;      /* isteğe göre yükseklik */
+  object-fit: cover;  /* resmi kırparak kutuya sığdırır */
+  border-radius: 8px; /* opsiyonel, hafif yuvarlak köşe */
 }
 
 .profil-ilan-bilgi {
@@ -781,17 +782,455 @@ margin-right: 5px;
     margin-bottom: 20px; /* İlan listesiyle arasına boşluk */
   }
 
+  /* İlan resimleri için */
   .profil-ilan-resim {
     width: 100%;
-    height: 200px;
+    height: 200px; /* Sabit yükseklik */
+    object-fit: cover; /* Orantılı kırpma */
+    border-radius: 8px 8px 0 0;
+    transition: transform 0.3s ease;
+  }
+
+  .ilan-resimler img {
+    width: 120px;
+    height: 80px;
     object-fit: cover;
-    border-radius: 8px;
-    background: linear-gradient(45deg, #f5f5f5, #e0e0e0); 
+    margin-right: 8px;  /* resimler arası boşluk */
   }
 
   .profil-ilan-resim:hover {
     transform: scale(1.03);
   }
+
+  /* Önizleme resmi için ek CSS */
+.profil-ilan-resim {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+  transition: transform 0.3s ease;
+}
+
+.profil-ilan-resim:hover {
+  transform: scale(1.03);
+}
+
+/* Genel Stiller */
+.profil-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+}
+
+/* Yükleniyor ve Hata Mesajları */
+.loading,
+.error {
+  text-align: center;
+  padding: 20px;
+  margin: 20px;
+  border-radius: 8px;
+}
+
+.loading {
+  background: #f8f9fa;
+  color: #666;
+}
+
+.error {
+  background: #ffe3e3;
+  color: #dc3545;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error button {
+  background: none;
+  border: none;
+  margin-left: 10px;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Profil Header */
+.profil-header {
+  text-align: center;
+  padding: 30px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+/* Profil avatarı için */
+.profil-avatar {
+  width: 150px;
+  height: 150px; /* Sabit boyut */
+  object-fit: cover; /* Orantılı kırpma */
+  border: 4px solid #fff;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+.profil-isim {
+  font-size: 2.5em;
+  margin: 10px 0;
+  color: #2c3e50;
+}
+
+.profil-konum {
+  color: #7f8c8d;
+  margin-bottom: 15px;
+}
+
+.profil-durum {
+  color: #e67e22;
+  font-weight: bold;
+}
+
+/* İstatistikler */
+.profil-istatistikler {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin: 25px 0;
+}
+
+.istatistik-kutu {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 100px;
+  transition: transform 0.3s;
+}
+
+.istatistik-kutu:hover {
+  transform: translateY(-5px);
+}
+
+.istatistik-deger {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #3498db;
+}
+
+.istatistik-baslik {
+  color: #7f8c8d;
+  font-size: 0.9em;
+}
+
+/* İletişim Butonları */
+.profil-iletisim {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.iletisim-btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 25px;
+  background: #3498db;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iletisim-btn:hover {
+  background: #2980b9;
+  transform: scale(1.05);
+}
+
+/* Sekmeler */
+.profil-sekmeler {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.sekme-btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  background: #ecf0f1;
+  color: #7f8c8d;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.sekme-btn.aktif {
+  background: #3498db;
+  color: white;
+  position: relative;
+}
+
+.sekme-btn.aktif::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #3498db transparent transparent transparent;
+}
+
+/* İçerik Alanları */
+.profil-icerik {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+}
+
+/* İlan Kartları */
+.profil-ilanlar {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+  margin-top: 25px;
+}
+
+.profil-ilan-karti {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+}
+
+.profil-ilan-karti:hover {
+  transform: translateY(-5px);
+}
+
+.profil-ilan-resim {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 3px solid #3498db;
+}
+
+.profil-ilan-bilgi {
+  padding: 15px;
+}
+
+.profil-ilan-baslik {
+  margin: 0 0 10px;
+  color: #2c3e50;
+  font-size: 1.2em;
+}
+
+.profil-ilan-fiyat {
+  color: #e74c3c;
+  font-weight: bold;
+  font-size: 1.1em;
+  margin: 10px 0;
+}
+
+.profil-ilan-tarih {
+  display: flex;
+  justify-content: space-between;
+  color: #7f8c8d;
+  font-size: 0.9em;
+}
+
+/* Form Stilleri */
+.ayarlar-formu {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-grup {
+  margin-bottom: 20px;
+}
+
+.form-etiket {
+  display: block;
+  margin-bottom: 8px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.sifre-input-wrapper {
+  position: relative;
+}
+
+.sifre-goster-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  cursor: pointer;
+}
+
+.form-buton {
+  background: #27ae60;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1em;
+  transition: background 0.3s;
+}
+
+.form-buton:hover {
+  background: #219a52;
+}
+
+/* Avatar Yükleme */
+.avatar-yukle {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.avatar-onizleme {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
+  border: 3px solid #3498db;
+}
+
+.avatar-sec-btn {
+  background: #3498db;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.avatar-sec-btn:hover {
+  background: #2980b9;
+}
+
+.avatar-kaldir-btn {
+  background: #e74c3c;
+  color: white;
+  margin-left: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.avatar-kaldir-btn:hover {
+  background: #c0392b;
+}
+
+/* Yorum Kartları */
+.yorum-karti {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Yorum avatarları için */
+.yorum-avatar {
+  width: 50px;
+  height: 50px; /* Sabit boyut */
+  object-fit: cover;
+}
+
+.yorum-ust {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.yorum-puan {
+  color: #f1c40f;
+  margin-bottom: 10px;
+}
+
+.puan-deger {
+  margin-left: 10px;
+  color: #7f8c8d;
+  font-size: 0.9em;
+}
+
+/* Footer */
+.profile__footer {
+  margin-top: 50px;
+  padding: 20px;
+  background: #2c3e50;
+  color: white;
+  border-radius: 15px;
+}
+
+.profile__footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.profile__avatar-small {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+/* Responsive Tasarım */
+@media (max-width: 768px) {
+  .profil-istatistikler {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .profil-sekmeler {
+    flex-wrap: wrap;
+  }
+  
+  .profil-ilanlar {
+    grid-template-columns: 1fr;
+  }
+  
+  .profile__footer-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+}
 
 /* Responsive Tasarım */
 @media (max-width: 768px) {

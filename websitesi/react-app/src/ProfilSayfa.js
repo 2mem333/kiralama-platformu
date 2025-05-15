@@ -9,8 +9,6 @@ const Profil = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
-  const [cevaplananYorumId, setCevaplananYorumId] = useState(null);
-  const [yorumCevabi, setYorumCevabi] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const navigate = useNavigate();
 

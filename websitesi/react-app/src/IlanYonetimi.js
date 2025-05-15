@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import UstCubuk2 from './UstCubukProfil';
 import './IlanYonetimi.css';
+import moment from 'moment'; // Tarih işlemleri için
 
 function IlanYonetimi() {
   const { kullaniciid } = useParams();
@@ -10,27 +11,58 @@ function IlanYonetimi() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [duzenlenenIlan, setDuzenlenenIlan] = useState(null);
-  const [ilanBaslik, setIlanBaslik] = useState('');
-  const [ilanFiyat, setIlanFiyat] = useState('');
+  const [formData, setFormData] = useState({
+    baslik: '',
+    aciklama: '',
+    fiyat: '',
+    bitisTarihi: ''
+  });
 
-  // İlanları çekme
+  const placeholderImage = "https://www.kindpng.com/picc/m/451-4517876_default-profile-hd-png-download.png";
+
+  // ── ① parseResimler fonksiyonu ─────────────────────────────
+  const parseResimler = (resimString) => {
+    try {
+      const cleaned = resimString
+        .replace(/\\+/g, '')                       // backslash'leri temizle
+        .replace(/^\{\s*"?|"?\s*\}$/g, '');       // baştaki { ve sondaki } işaretlerini çıkar
+
+      return cleaned
+        .split(',')
+        .map(url => url.trim().replace(/^"|"$/g, ''))
+        .filter(url => url.length > 0);
+    } catch (e) {
+      console.error('Resim parse hatası:', e);
+      return [];
+    }
+  };
+
+  // ── ② İlanları çekerken parse et ────────────────────────────
   useEffect(() => {
     const fetchIlanlar = async () => {
       try {
         const params = new URLSearchParams({ sahipid: kullaniciid });
         const response = await fetch(`http://localhost:5000/api/ilanlar?${params}`);
-        
         if (!response.ok) throw new Error('Veri alınamadı');
-        
         const data = await response.json();
-        setIlanlar(data);
+
+        const mapped = data.map(ilan => {
+          const resimler = ilan.resim ? parseResimler(ilan.resim) : [];
+          return {
+            ...ilan,
+            resimler: resimler.length ? resimler : [placeholderImage],
+            olusturulmaTarihi: moment(ilan.olusturulmaTarihi).format('DD.MM.YYYY'),
+            kalanSure: moment(ilan.bitisTarihi).diff(moment(), 'days') + ' gün'
+          };
+        });
+
+        setIlanlar(mapped);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    
     fetchIlanlar();
   }, [kullaniciid]);
 
@@ -43,17 +75,18 @@ function IlanYonetimi() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          baslik: ilanBaslik,
-          fiyat: ilanFiyat
-        }),
+        body: JSON.stringify(formData),
       });
       
       if (!response.ok) throw new Error('Güncelleme başarısız');
       
       const updatedIlan = await response.json();
       setIlanlar(ilanlar.map(ilan => 
-        ilan.ilanid === updatedIlan.ilanid ? updatedIlan : ilan
+        ilan.ilanid === updatedIlan.ilanid ? {
+          ...updatedIlan,
+          olusturulmaTarihi: moment(updatedIlan.olusturulmaTarihi).format('DD.MM.YYYY'),
+          kalanSure: moment(updatedIlan.bitisTarihi).diff(moment(), 'days') + ' gün'
+        } : ilan
       ));
       setDuzenlenenIlan(null);
       alert('İlan başarıyla güncellendi!');
@@ -62,9 +95,18 @@ function IlanYonetimi() {
     }
   };
 
+  // Form input değişiklikleri
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
   // Görsel URL'sini işleme
-  const getImageUrl = (resimYolu) => {
-    return resimYolu || "https://www.kindpng.com/picc/m/451-4517876_default-profile-hd-png-download.png";
+  const getImageUrl = (resimler) => {
+    if (!resimler || resimler.length === 0) return placeholderImage;
+    return resimler[0]; // İlk resmi göster
   };
 
   if (loading) return <div className="loading">Yükleniyor...</div>;
@@ -79,7 +121,7 @@ function IlanYonetimi() {
           <button 
             className="yeni-ilan-btn"
             onClick={() => navigate(`/ilanolustur`)}
-            >
+          >
             + Yeni İlan Ekle
           </button>
         </div>
@@ -91,16 +133,32 @@ function IlanYonetimi() {
                 <form onSubmit={handleGuncelle} className="ilan-duzenleme-formu">
                   <input
                     type="text"
-                    value={ilanBaslik}
-                    onChange={(e) => setIlanBaslik(e.target.value)}
+                    name="baslik"
+                    value={formData.baslik}
+                    onChange={handleChange}
                     placeholder="İlan Başlığı"
+                    required
+                  />
+                  <textarea
+                    name="aciklama"
+                    value={formData.aciklama}
+                    onChange={handleChange}
+                    placeholder="Açıklama"
                     required
                   />
                   <input
                     type="number"
-                    value={ilanFiyat}
-                    onChange={(e) => setIlanFiyat(e.target.value)}
-                    placeholder="Fiyat"
+                    name="fiyat"
+                    value={formData.fiyat}
+                    onChange={handleChange}
+                    placeholder="Günlük Fiyat"
+                    required
+                  />
+                  <input
+                    type="date"
+                    name="bitisTarihi"
+                    value={formData.bitisTarihi}
+                    onChange={handleChange}
                     required
                   />
                   <div className="duzenleme-butonlar">
@@ -112,23 +170,39 @@ function IlanYonetimi() {
                 </form>
               ) : (
                 <>
-                  <img 
-                    src={getImageUrl(ilan.resim)} 
-                    alt={ilan.baslik} 
-                    className="ilan-resim" 
-                  />
+                  <div className="ilan-resimler">
+                     {ilan.resimler.map((src, index) => (
+                      <img
+                        key={index}
+                        src={src}                        // doğru alan: src zaten doğrudan URL
+                       alt={`${ilan.baslik} ${index+1}`}
+                       onError={e => { e.target.onerror = null; e.target.src = placeholderImage; }}
+                      />
+                     ))}
+                  </div>
                   <div className="ilan-bilgileri">
+                    <div className="ilan-meta">
+                      <span>Oluşturulma: {ilan.olusturulmaTarihi}</span>
+                      <span>Kalan Süre: {ilan.kalanSure}</span>
+                    </div>
                     <h3>{ilan.baslik}</h3>
-                    <p>{ilan.fiyat}₺</p>
+                    <p className="aciklama">{ilan.aciklama}</p>
+                    <div className="ilan-fiyat">
+                      {ilan.fiyat}₺/gün
+                    </div>
                     <div className="ilan-aksiyonlar">
                       <button
                         onClick={() => {
                           setDuzenlenenIlan(ilan);
-                          setIlanBaslik(ilan.baslik);
-                          setIlanFiyat(ilan.fiyat);
+                          setFormData({
+                            baslik: ilan.baslik,
+                            aciklama: ilan.aciklama,
+                            fiyat: ilan.fiyat,
+                            bitisTarihi: moment(ilan.bitisTarihi).format('YYYY-MM-DD')
+                          });
                         }}
                       >
-                        Düzenle
+                        İlanı Güncelle
                       </button>
                     </div>
                   </div>

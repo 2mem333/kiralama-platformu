@@ -151,6 +151,26 @@ const [_PROFIL, fProfil] = useState(new Profil());
 
 const [yorumlar, setYorumlar] = useState(_DEGERLENDIRMELER);
 
+
+  // Resim parse fonksiyonunu ekleyin
+  const parseResimler = (resimString) => {
+    try {
+    // 1) Baş ve sondaki ters eğik çizgeleri ("\") ve fazladan tırnakları temizle
+    const cleaned = resimString
+      .replace(/\\+/g, '')         // bütün backslash'leri kaldır
+      .replace(/^\{\s*"?|"?\s*\}$/g, '') // baştaki { ve sondaki } karakterlerini (ve etrafındaki tırnakları) çıkar
+
+      // 2) Virgüle göre böl, fazladan tırnakları temizle
+      return cleaned
+        .split(',')
+        .map(url => url.trim().replace(/^"|"$/g, ''))
+        .filter(url => url.length > 0);
+    } catch (e) {
+      console.error('Resim parse hatası:', e);
+      return [];
+    }
+  };
+
 useEffect(() => {
   const fetchCurrentUser = async () => {
     try {
@@ -195,33 +215,29 @@ useEffect(() => {
       try {
         const params = new URLSearchParams({ limit: '3', sahipid: kullaniciid });
         const res = await fetch(`http://localhost:5000/api/ilanlar?${params}`);
-        
         if (!res.ok) throw new Error('API yanıtı başarısız');
-        
-        const dataArray = await res.json();
-        
-        const ilanlarArray = dataArray.map(item => {
-          // Resim alanını JSON string'den array'e çevir
-          let resimler = [];
-          try {
-            resimler = JSON.parse(item.resim.replace(/\\/g, ''));
-          } catch (error) {
-            console.error('Resim parse hatası:', error);
-          }
-          
+
+        const data = await res.json();
+
+        const ilanlarArray = data.map(item => {
+          // veritabanından gelen raw string'i diziye çevir
+          const urls = item.resim ? parseResimler(item.resim) : [];
+          // eğer hiç URL yoksa fallback olarak placeholder kullan
+          const resimler = urls.length ? urls : [placeholderImage];
+
           return new Ilanlar()
-            .degerAta('ilanAdi', item.baslik)
+            .degerAta('ilanAdi',   item.baslik)
             .degerAta('gunlukFiyat', item.fiyat)
-            .degerAta('ilanId', item.ilanid)
-            .degerAta('ilanResim', resimler) // Array olarak kaydet
+            .degerAta('ilanId',     item.ilanid)
+            .degerAta('ilanResim',  resimler);
         });
-        
+
         fIlanlar(ilanlarArray);
       } catch (err) {
         console.error(err);
       }
     };
-   ilanlari_cek();
+  ilanlari_cek();
 
    const degerlendirmeleri_cek = async() => {
     try {
@@ -411,11 +427,9 @@ useEffect(() => {
   const placeholderImage = "https://www.kindpng.com/picc/m/451-4517876_default-profile-hd-png-download.png";
 
   // Görsel URL'sini işleyen fonksiyon
-  const getImageUrl = (resimYolu) => {
-    if (!resimYolu || resimYolu.length === 0) return placeholderImage;
-    
-    // Firebase URL'leri direkt kullan
-    return resimYolu;
+  const getImageUrl = (resimler) => {
+    if (!resimler || resimler.length === 0) return placeholderImage;
+    return resimler[0]; // İlk resmi göster
   };
 
   // Yıldız puanlama oluşturma
@@ -511,7 +525,7 @@ return (
       </button>
       <div className="profil-header">
         <img 
-          src={getImageUrl(_PROFIL.avatar)}  
+          src={(_PROFIL.avatar)}  
           className="profil-avatar" 
           alt="Profil Avatar"
         />
@@ -668,14 +682,11 @@ return (
                     </div>
                   ) : (
                     <>
-                      <img 
-                        src={ilan.ilanResim?.[0] || placeholderImage} 
+                      <img
+                        className="profil-ilan-resim"         // ← burayı ekliyoruz
+                        src={ilan.ilanResim[0]}
                         alt={ilan.ilanAdi}
-                        className="profil-ilan-resim"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = placeholderImage;
-                        }}
+                        onError={e => { e.target.onerror = null; e.target.src = placeholderImage; }}
                       />
                       <div className="profil-ilan-bilgi">
                         <h3 className="profil-ilan-baslik">{ilan.ilanAdi}</h3>
