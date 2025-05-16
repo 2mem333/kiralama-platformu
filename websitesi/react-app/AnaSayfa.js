@@ -276,12 +276,12 @@ const AnaSayfa = () => {
                   onClick={() => ilanDetayiniGoster(ilan)}
                 >
                   <div className="ilan-resim-container">
-                    <img 
+                    {/* <img 
                       src={getImageUrl(ilan.resim)} 
                       alt={ilan.baslik} 
                       className="ilan-resmi" 
                     />
-                    <span className="ilan-durum">{ilan.durum}</span>
+                    <span className="ilan-durum">{ilan.durum}</span> */}
                   </div>
                   <div className="ilan-bilgileri">
                     <div className="ilan-ust-bilgi">

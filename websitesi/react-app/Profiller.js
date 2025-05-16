@@ -541,10 +541,13 @@ return (
             <div className="istatistik-deger">{_ILANLAR.length}</div>
             <div className="istatistik-baslik">İlan</div>
           </div>
-          <div className="istatistik-kutu">
-            <div className="istatistik-deger">{favoriIlanlar.length}</div>
-            <div className="istatistik-baslik">Favori</div>
-          </div>
+          {/* Sadece kendi profili görüntüleniyorsa Favori istatistiğini göster */}
+          {currentUserId === parseInt(kullaniciid) && (
+            <div className="istatistik-kutu">
+              <div className="istatistik-deger">{favoriIlanlar.length}</div>
+              <div className="istatistik-baslik">Favori</div>
+            </div>
+          )}
           <div className="istatistik-kutu">
             <div className="istatistik-deger">{_DEGERLENDIRMELER.length}</div>
             <div className="istatistik-baslik">Yorum</div>
