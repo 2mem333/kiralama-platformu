@@ -1,271 +1,114 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import UstCubukProfil from './UstCubukProfil';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './ProfilSayfa.css';
+
+//-----------------------JAVASCIPT KODLARI BASLANGIC---------------------------------------------------------------------------------------------------------
 
 const Profil = () => {
-  const { kullaniciid } = useParams();
+  const navigate = useNavigate();
   const [aktifSekme, setAktifSekme] = useState('hakkimda');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const navigate = useNavigate();
+  const [yeniYorum, setYeniYorum] = useState('');
+  const [yeniPuan, setYeniPuan] = useState(0);
+  const [geciciPuan, setGeciciPuan] = useState(0);
+  const [cevaplananYorumId, setCevaplananYorumId] = useState(null);
+  const [yorumCevabi, setYorumCevabi] = useState('');
 
-  class KullaniciBilgileri {
-  constructor() {
-    this.email = '';
-    this.ad = '';
-    this.soyad = '';
-    this.dogumTarihi = '';
-    this.telefonNumarasi = '';
-    this.adres = '';
-    this.postaKodu = '';
-    this.avatar = '';
-  }
-
-  // Değer atamak için metot
-  degerAta(alan, deger) {
-    this[alan] = deger;
-    return this;
-  }
-
-  // Kopyalama metodu (değişiklikleri yeni bir nesneye uygulamak için)
-  kopyala() {
-    const yeniKullanici = new KullaniciBilgileri();
-    Object.keys(this).forEach(anahtar => {
-      yeniKullanici[anahtar] = this[anahtar];
-    });
-    return yeniKullanici;
-  }
-
-}
-
-class Profil {
-  constructor() {
-    this.avatar = '';
-    this.hakkinda = '';
-  }
-
-  // Değer atamak için metot
-  degerAta(alan, deger) {
-    this[alan] = deger;
-    return this;
-  }
-
-  // Kopyalama metodu (değişiklikleri yeni bir nesneye uygulamak için)
-  kopyala() {
-    const profil = new Profil();
-    Object.keys(this).forEach(anahtar => {
-      profil[anahtar] = this[anahtar];
-    });
-    return profil;
-  }
-
-}
-
-class Degerlendirmeler {
-  constructor() {
-    this.yorumMetni = '';
-    this.degerlendirenId = '';
-    this.puan = 0.0;
-  }
-
-  // Değer atamak için metot
-  degerAta(alan, deger) {
-    this[alan] = deger;
-    return this;
-  }
-
-  // Kopyalama metodu (değişiklikleri yeni bir nesneye uygulamak için)
-  kopyala() {
-    const temp = new Degerlendirmeler();
-    Object.keys(this).forEach(anahtar => {
-      temp[anahtar] = this[anahtar];
-    });
-    return temp;
-  }
-
-}
-
-class Ilanlar {
-  constructor() {
-    this.ilanAdi = '';
-    this.gunlukFiyat = '';
-    this.ilanResim = '';
-    this.ilanId = 0;
-  }
-
-  // Değer atamak için metot
-  degerAta(alan, deger) {
-    this[alan] = deger;
-    return this;
-  }
-
-  // Kopyalama metodu (değişiklikleri yeni bir nesneye uygulamak için)
-  kopyala() {
-    const temp = new Ilanlar();
-    Object.keys(this).forEach(anahtar => {
-      temp[anahtar] = this[anahtar];
-    });
-    return temp;
-  }
-}
-
-  
-  // Veritabanı state'leri
-  const [kullanici, setKullanici] = useState({
-    isim: '',
-    email: '',
-    telefon: '',
-    hakkimda: '',
-    avatar: '',
-    konum: '',
-    kayitTarihi: '',
-    dogumTarihi: ''
+  const [profilBilgileri, setProfilBilgileri] = useState({
+    isim: "Ahmet Yılmaz",
+    konum: "İstanbul, Türkiye",
+    avatar: "/profil-avatar.jpg",
+    durum: "Premium Üye",
+    hakkimda: "10 yıldır ikinci el eşya alım satımı yapıyorum. Özellikle antika mobilyalara ilgim var. Satın aldığım ve sattığım ürünlerin kaliteli olmasına özen gösteririm.",
+    telefon: "+90 555 123 45 67",
+    email: "ahmet.yilmaz@example.com",
+    kayitTarihi: "12.03.2018",
+    dogumTarihi: "15.08.1985"
   });
 
-  const [ilanlar, setIlanlar] = useState([]);
-  const [yorumlar, setYorumlar] = useState([]);
-  const [profil, setProfil] = useState({});
+  // Kullanıcının ilanları
+  const [kullaniciIlanlari, setKullaniciIlanlari] = useState([
+    {
+      id: 1,
+      baslik: "Antika Sandalye Seti",
+      fiyat: 4500,
+      resim: "/antika-sandalye.jpg",
+      tarih: "3 gün önce",
+      goruntulenme: 124,
+      favori: 8
+    },
+    {
+      id: 2,
+      baslik: "Vintage Masa",
+      fiyat: 3200,
+      resim: "/vintage-masa.jpg",
+      tarih: "1 hafta önce",
+      goruntulenme: 89,
+      favori: 5
+    },
+    {
+      id: 3,
+      baslik: "Eski Tip Radyo",
+      fiyat: 1200,
+      resim: "/eski-radyo.jpg",
+      tarih: "2 hafta önce",
+      goruntulenme: 156,
+      favori: 12
+    }
+  ]);
 
   // Kullanıcının favori ilanları
-    const [favoriIlanlar, setFavoriIlanlar] = useState([
-      {
-        id: 101,
-        baslik: "Retro Koltuk Takımı",
-        fiyat: "6800₺/ay",
-        resim: "/retro-koltuk.jpg",
-        sahibi: "Ayşe Demir"
-      },
-      {
-        id: 102,
-        baslik: "Ahşap Kitaplık",
-        fiyat: "2300₺/ay",
-        resim: "/ahsap-kitaplik.jpg",
-        sahibi: "Mehmet Kaya"
-      }
-    ]);
+  const [favoriIlanlar, setFavoriIlanlar] = useState([
+    {
+      id: 101,
+      baslik: "Retro Koltuk Takımı",
+      fiyat: 6800,
+      resim: "/retro-koltuk.jpg",
+      sahibi: "Ayşe Demir"
+    },
+    {
+      id: 102,
+      baslik: "Ahşap Kitaplık",
+      fiyat: 2300,
+      resim: "/ahsap-kitaplik.jpg",
+      sahibi: "Mehmet Kaya"
+    }
+  ]);
 
-  const [_KULLANICI, fKullanici] = useState(new KullaniciBilgileri()); //KULLANICI BURAYA CEKILIR
-  const [_ILANLAR, fIlanlar] = useState([]);
-  const [_DEGERLENDIRMELER, fDegerlendirmeler] = useState([]);
-  const [_PROFIL, fProfil] = useState(new Profil());
-  
-  useEffect(() => {
-      const fetchKullanici = async () => {
-        try {
-          const params = new URLSearchParams({ kullaniciid });
-          const res = await fetch(`http://localhost:5000/api/profiller?${params}`);
-          if (!res.ok) throw new Error('API yanıtı başarısız');
-  
-          const [data] = await res.json();
-  
-          // Yeni bir class örneği oluşturup, sadece ihtiyacımız olan alanları ata
-          const yeniKullanici = new KullaniciBilgileri()
-            .degerAta('email', data.eposta)
-            .degerAta('ad', data.ad)
-            .degerAta('soyad', data.soyad)
-            .degerAta('dogumTarihi', data.dogumTarihi)
-            .degerAta('telefonNumarasi', data.telefon)
-            .degerAta('adres', data.adres)
-            .degerAta('email', data.eposta);
-  
-          fKullanici(yeniKullanici);
-        } catch (err) {
-          console.error(err);
-        } finally {
-        }
-      };
-      fetchKullanici();
-  
-      const ilanlari_cek = async () => {
-  
-    try {
-      const params = new URLSearchParams({ limit: '3', sahipid: kullaniciid });
-      const res = await fetch(`http://localhost:5000/api/ilanlar?${params}`);
-      if (!res.ok) throw new Error('API yanıtı başarısız');
-  
-      // 1) JSON dizisini al
-      const dataArray = await res.json(); 
-  
-      // 2) Her bir objeyi Ilanlar sınıfına dönüştür
-      const ilanlarArray = dataArray.map(item =>
-        new Ilanlar()
-          .degerAta('ilanAdi',     item.baslik)
-          .degerAta('gunlukFiyat', item.fiyat)
-          .degerAta('ilanId',      item.ilanid)
-          .degerAta('ilanResim',   item.resim)
-      );
-  
-      // 3) Tüm diziyi state’e ata
-      fIlanlar(ilanlarArray);
-    } catch (err) {
-      console.error(err);
+  // Kullanıcıya gelen yorumlar
+  const [yorumlar, setYorumlar] = useState([
+    {
+      id: 1,
+      yazar: "Zeynep Ak",
+      avatar: "/yorumcu1.jpg",
+      tarih: "2 gün önce",
+      puan: 5,
+      icerik: "Ahmet Bey'den çok memnun kaldım. Ürün tam olarak tarif edildiği gibiydi. Çok nazik ve güvenilir bir satıcı.",
+      cevaplar: []
+    },
+    {
+      id: 2,
+      yazar: "Can Demir",
+      avatar: "/yorumcu2.jpg",
+      tarih: "1 hafta önce",
+      puan: 4,
+      icerik: "Ürün iyi durumdaydı ancak teslimat biraz gecikti. Yine de iletişim kurarken çok kibardı.",
+      cevaplar: []
     }
-      };
-     ilanlari_cek();
-  
-     const degerlendirmeleri_cek = async() => {
-      try {
-      const params = new URLSearchParams({ limit: '15', degerlendirilen_id: kullaniciid });
-      const res = await fetch(`http://localhost:5000/api/degerlendirmeler?${params}`);
-      if (!res.ok) throw new Error('API yanıtı başarısız');
-  
-      // 1) JSON dizisini al
-      const dataArray = await res.json(); 
-  
-      // 2) Her bir objeyi Ilanlar sınıfına dönüştür
-      const DegerlendirmelerArray = dataArray.map(item =>
-        new Degerlendirmeler()
-          .degerAta('yorumMetni',     item.yorum)
-          .degerAta('degerlendirenId', item.degerlendiren_id)
-          .degerAta('puan',      item.puan)
-      );
-  
-      // 3) Tüm diziyi state’e ata
-      fDegerlendirmeler(DegerlendirmelerArray);
-    } catch (err) {
-      console.error(err);
-    }
-      };
-     degerlendirmeleri_cek();
-  
-     const profili_cek = async() => {
-       try {
-          const params = new URLSearchParams({ sahipid: kullaniciid });
-          const res = await fetch(`http://localhost:5000/api/profil?${params}`);
-          if (!res.ok) throw new Error('API yanıtı başarısız');
-  
-          const [data] = await res.json();
-  
-          // Yeni bir class örneği oluşturup, sadece ihtiyacımız olan alanları ata
-          const prof = new Profil()
-            .degerAta('hakkinda', data.hakkinda)
-            .degerAta('avatar', data.avatar)
-  
-          fProfil(prof);
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-     }
-     profili_cek();
-  
-    }, [kullaniciid]);
+  ]);
 
     // Ortalama puan hesaplama
-  const ortalamaPuan = (yorumlar.length > 0)
-  ? (yorumlar.reduce((toplam, d) => toplam + d.puan, 0) / yorumlar.length).toFixed(1)
-  : "0.0";
+  const ortalamaPuan = yorumlar.length > 0 
+    ? (yorumlar.reduce((toplam, yorum) => toplam + yorum.puan, 0) / yorumlar.length).toFixed(1)
+    : 0;
 
   // Ayarlar formu state'i güncellendi
   const [ayarlarFormu, setAyarlarFormu] = useState({
-    isim: kullanici.isim,
-    email: kullanici.email,
-    telefon: kullanici.telefon,
-    hakkimda: kullanici.hakkimda,
+    isim: profilBilgileri.isim,
+    email: profilBilgileri.email,
+    telefon: profilBilgileri.telefon,
+    hakkimda: profilBilgileri.hakkimda,
     mevcutSifre: '',
     yeniSifre: '',
     yeniSifreTekrar: ''
@@ -274,40 +117,27 @@ class Ilanlar {
   // Form gönderimi güncellendi
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    let changes = {
-      bilgilerDegisti: false,
-      sifreDegisti: false
-    };
-
-    // Check for profile info changes
-    if (ayarlarFormu.isim !== kullanici.isim || 
-        ayarlarFormu.email !== kullanici.email || 
-        ayarlarFormu.telefon !== kullanici.telefon || 
-        ayarlarFormu.hakkimda !== kullanici.hakkimda) {
-      changes.bilgilerDegisti = true;
-    }
-
-    // Check for password changes
+    
+    // Şifre değişiklik kontrolü
     if (ayarlarFormu.yeniSifre || ayarlarFormu.mevcutSifre) {
       if (ayarlarFormu.yeniSifre !== ayarlarFormu.yeniSifreTekrar) {
         alert('Yeni şifreler eşleşmiyor!');
         return;
       }
-      changes.sifreDegisti = true;
+      // Burada genellikle API çağrısı yapılır
       alert('Şifre başarıyla güncellendi!');
     }
 
-    // Apply changes
-    if (changes.bilgilerDegisti) {
-      setKullanici({
-        ...kullanici,
-        isim: ayarlarFormu.isim,
-        email: ayarlarFormu.email,
-        telefon: ayarlarFormu.telefon,
-        hakkimda: ayarlarFormu.hakkimda
-      });
-    }
+    // Profil bilgilerini güncelle
+    setProfilBilgileri({
+      ...profilBilgileri,
+      isim: ayarlarFormu.isim,
+      email: ayarlarFormu.email,
+      telefon: ayarlarFormu.telefon,
+      hakkimda: ayarlarFormu.hakkimda
+    });
 
+    // Formu sıfırla
     setAyarlarFormu({
       ...ayarlarFormu,
       mevcutSifre: '',
@@ -315,9 +145,7 @@ class Ilanlar {
       yeniSifreTekrar: ''
     });
 
-    if (changes.bilgilerDegisti || changes.sifreDegisti) {
-      alert('Profil bilgileriniz güncellendi!');
-    }
+    alert('Profil bilgileriniz güncellendi!');
   };
 
   // Yeni ilan düzenleme state
@@ -348,12 +176,95 @@ class Ilanlar {
     }));
   };
 
+  // Dosya seçme işlemi
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      // Önizleme için URL oluştur
+      const imageUrl = URL.createObjectURL(file);
+      setProfilBilgileri({
+        ...profilBilgileri,
+        avatar: imageUrl
+      });
+    }
+  };
+
   // Profil fotoğrafını kaldırma işlemi
   const handleRemoveAvatar = () => {
-    setKullanici({
-      ...kullanici,
+    setProfilBilgileri({
+      ...profilBilgileri,
       avatar: "/profil-avatar.jpg" // Varsayılan avatar görseline geri dön
     });
+  };
+
+  // Yeni yorum ekleme işlemi
+  const handleYorumEkle = (e) => {
+    e.preventDefault();
+    if (yeniYorum.trim() === '' || yeniPuan === 0) {
+      alert('Lütfen bir yorum yazın ve puan verin!');
+      return;
+    }
+
+    const yeniYorumObj = {
+      id: yorumlar.length + 1,
+      yazar: "Mevcut Kullanıcı",
+      avatar: "/mevcut-kullanici.jpg",
+      tarih: "Şimdi",
+      puan: yeniPuan,
+      icerik: yeniYorum,
+      cevaplar: []
+    };
+
+    setYorumlar([...yorumlar, yeniYorumObj]);
+    setYeniYorum('');
+    setYeniPuan(0);
+    setGeciciPuan(0);
+    alert('Yorumunuz başarıyla eklendi!');
+  };
+
+  // Yorum cevaplama işlemi
+  const handleYorumCevap = (yorumId) => {
+    if (cevaplananYorumId === yorumId) {
+      setCevaplananYorumId(null);
+      setYorumCevabi('');
+    } else {
+      setCevaplananYorumId(yorumId);
+      setYorumCevabi('');
+    }
+  };
+
+  // Yorum cevabı gönderme
+  const handleCevapGonder = (yorumId, e) => {
+    e.preventDefault();
+    if (!yorumCevabi.trim()) {
+      alert('Lütfen cevap metni girin!');
+      return;
+    }
+
+    const guncellenmisYorumlar = yorumlar.map(yorum => {
+      if (yorum.id === yorumId) {
+        return {
+          ...yorum,
+          cevaplar: [
+            ...yorum.cevaplar,
+            {
+              id: yorum.cevaplar.length + 1,
+              yazar: profilBilgileri.isim,
+              avatar: profilBilgileri.avatar,
+              tarih: "Şimdi",
+              icerik: yorumCevabi
+            }
+          ]
+        };
+      }
+      return yorum;
+    });
+
+    setYorumlar(guncellenmisYorumlar);
+    setYorumCevabi('');
+    setCevaplananYorumId(null);
+    alert('Cevabınız gönderildi!');
   };
 
   // Favori ilan kaldırma
@@ -384,7 +295,7 @@ class Ilanlar {
   // İlan güncelleme
   const handleIlanGuncelle = (e) => {
     e.preventDefault();
-    const guncellenmisIlanlar = ilanlar.map(ilan => {
+    const guncellenmisIlanlar = kullaniciIlanlari.map(ilan => {
       if (ilan.id === duzenlenenIlan.id) {
         return {
           ...ilan,
@@ -395,7 +306,7 @@ class Ilanlar {
       return ilan;
     });
 
-    setIlanlar(guncellenmisIlanlar);
+    setKullaniciIlanlari(guncellenmisIlanlar);
     setDuzenlenenIlan(null);
     setIlanBaslik('');
     setIlanFiyat('');
@@ -405,40 +316,33 @@ class Ilanlar {
   // İlan silme
   const handleIlanSil = (ilanId) => {
     if (window.confirm('Bu ilanı silmek istediğinize emin misiniz?')) {
-      setIlanlar(ilanlar.filter(ilan => ilan.id !== ilanId));
+      setKullaniciIlanlari(kullaniciIlanlari.filter(ilan => ilan.id !== ilanId));
       alert('İlan başarıyla silindi!');
     }
   };
 
-  // Dosya seçme işlemi
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      // Önizleme için URL oluştur
-      const imageUrl = URL.createObjectURL(file);
-      setKullanici({
-        ...kullanici,
-        avatar: imageUrl
-      });
-    }
-  };
-
-
   // Yıldız puanlama oluşturma
-  const renderYildizlar = (puan) => {
+  const renderYildizlar = (puan, interactive = false, onHover = null, onClick = null) => {
     return Array(5).fill(0).map((_, i) => (
-      <span key={i} style={{ color: i < puan ? '#ff9800' : '#ddd' }}>★</span>
+      <span 
+        key={i} 
+        style={{ color: i < puan ? '#ff9800' : '#ddd', cursor: interactive ? 'pointer' : 'default' }}
+        onMouseEnter={interactive ? () => onHover(i + 1) : null}
+        onMouseLeave={interactive ? () => onHover(yeniPuan) : null}
+        onClick={interactive ? () => onClick(i + 1) : null}
+      >
+        ★
+      </span>
     ));
   };
 
   // Placeholder görsel URL'si
-  const placeholderImage = ("https://via.placeholder.com/150?text=Profil+Görseli");
+  const placeholderImage = "https://via.placeholder.com/150?text=Profil+Görseli";
 
   // Görsel URL'sini işleyen fonksiyon
   const getImageUrl = (resimYolu) => {
-    const placeholder = 'https://www.kindpng.com/picc/m/451-4517876_default-profile-hd-png-download.png';
-    return resimYolu || placeholder;
+    if (!resimYolu) return placeholderImage;
+    return resimYolu;
   };
 
   // Ana sayfaya dönme fonksiyonu
@@ -446,61 +350,37 @@ class Ilanlar {
     navigate('/');
   };
 
-  {error && (
-    <div className="error-message">
-      Hata: {error} 
-      <button onClick={() => setError(null)}>×</button>
-    </div>
-  )}
-
-  {loading && (
-    <div className="loading-indicator">
-      <div className="spinner"></div>
-      Yükleniyor...
-    </div>
-  )}
-
 //-----------------------JAVASCIPT KODLARI BITIS---------------------------------------------------------------------------------------------------------  
 
 //-----------------------JSX BLOGU BASLANGIC--------------------------------------------------------------------------------------------------------
 
   return (
-  <> 
-    {loading && (
-      <div className="loading">Yükleniyor...</div>
-    )}
-    {error && (
-      <div className="error">{`Hata: ${error}`} 
-        <button onClick={() => setError(null)}>×</button>
-      </div>
-    )}
-    <UstCubukProfil/>
     <div className="profil-container">
       {/* Ana sayfaya dön butonu */}
       <button 
         className="ana-sayfa-btn"
         onClick={handleAnaSayfayaDon}
       >
-        <span className="fas fa-home"></span> 🏠︎
+        <i className="fas fa-home"></i> 🏠︎
       </button>
       
       {/* Profil Başlık Alanı */}
       <div className="profil-header">
         <img 
-          src={getImageUrl(kullanici.avatar)}  
+          src={getImageUrl(profilBilgileri.avatar)}  
           className="profil-avatar" 
           alt="Profil Avatar"
         />
-        <h1 className="profil-isim">{kullanici.isim}</h1>
+        <h1 className="profil-isim">{profilBilgileri.isim}</h1>
         <div className="profil-konum">
-          <i className="fas fa-map-marker-alt"></i> {kullanici.konum}
+          <i className="fas fa-map-marker-alt"></i> {profilBilgileri.konum}
         </div>
-        <div className="profil-durum">{kullanici.durum}</div>
+        <div className="profil-durum">{profilBilgileri.durum}</div>
 
         {/* İstatistikler */}
         <div className="profil-istatistikler">
           <div className="istatistik-kutu">
-            <div className="istatistik-deger">{ilanlar.length}</div>
+            <div className="istatistik-deger">{kullaniciIlanlari.length}</div>
             <div className="istatistik-baslik">İlan</div>
           </div>
           <div className="istatistik-kutu">
@@ -516,8 +396,18 @@ class Ilanlar {
             <div className="istatistik-baslik">Puan</div>
           </div>
         </div>
+        
+        {/* İletişim Butonları */}
+        <div className="profil-iletisim">
+          <button className="iletisim-btn">
+            <i className="fas fa-envelope"></i> Mesaj Gönder
+          </button>
+          <button className="iletisim-btn">
+            <i className="fas fa-phone"></i> Ara
+          </button>
+        </div>
       </div>
-
+      
       {/* Profil Sekmeleri */}
       <div className="profil-sekmeler">
         <button 
@@ -530,7 +420,7 @@ class Ilanlar {
           className={`sekme-btn ${aktifSekme === 'ilanlar' ? 'aktif' : ''}`}
           onClick={() => setAktifSekme('ilanlar')}
         >
-          İlanlar ({ilanlar.length})
+          İlanlar ({kullaniciIlanlari.length})
         </button>
         <button 
           className={`sekme-btn ${aktifSekme === 'favoriler' ? 'aktif' : ''}`}
@@ -551,46 +441,44 @@ class Ilanlar {
           Ayarlar
         </button>
       </div>
-
+      
       {/* Profil İçerik Alanı */}
       <div className="profil-icerik">
         {/* Hakkında Sekmesi */}
         {aktifSekme === 'hakkimda' && (
           <div className="hakkimda-sekme">
             <h2 className="hakkimda-baslik">Hakkımda</h2>
-            <p className="hakkimda-icerik">{kullanici.hakkimda}</p>
+            <p className="hakkimda-icerik">{profilBilgileri.hakkimda}</p>
             
             <div className="hakkimda-detaylar">
               <div className="hakkimda-detay">
                 <span className="hakkimda-icon">📱</span>
-                <span className="hakkimda-text">{kullanici.telefon}</span>
+                <span className="hakkimda-text">{profilBilgileri.telefon}</span>
               </div>
               <div className="hakkimda-detay">
                 <span className="hakkimda-icon">✉️</span>
-                <span className="hakkimda-text">{kullanici.email}</span>
+                <span className="hakkimda-text">{profilBilgileri.email}</span>
               </div>
               <div className="hakkimda-detay">
                 <span className="hakkimda-icon">📅</span>
-                <span className="hakkimda-text">Üyelik Tarihi: {kullanici.kayitTarihi}</span>
+                <span className="hakkimda-text">Üyelik Tarihi: {profilBilgileri.kayitTarihi}</span>
               </div>
               <div className="hakkimda-detay">
                 <span className="hakkimda-icon">🎂</span>
-                <span className="hakkimda-text">Doğum Tarihi: {kullanici.dogumTarihi}</span>
+                <span className="hakkimda-text">Doğum Tarihi: {profilBilgileri.dogumTarihi}</span>
               </div>
             </div>
           </div>
         )}
+        
         {/* İlanlar Sekmesi */}
         {aktifSekme === 'ilanlar' && (
           <div className="ilanlar-sekme">
             <h2 className="hakkimda-baslik">İlanlarım</h2>
-            <button>
-              Daha fazlasını görüntüle
-            </button>
             <div className="profil-ilanlar">
-              {_ILANLAR.map(ilanlar => (
-                <div key={ilanlar.ilanId} className="profil-ilan-karti">
-                  {duzenlenenIlan && duzenlenenIlan.ilanId === ilanlar.ilanId ? (
+              {kullaniciIlanlari.map(ilan => (
+                <div key={ilan.id} className="profil-ilan-karti">
+                  {duzenlenenIlan && duzenlenenIlan.id === ilan.id ? (
                     <div className="ilan-duzenleme-formu">
                       <form onSubmit={handleIlanGuncelle}>
                         <div className="form-grup">
@@ -603,7 +491,7 @@ class Ilanlar {
                           />
                         </div>
                         <div className="form-grup">
-                          <label>Fiyat </label>
+                          <label>Fiyat (TL)</label>
                           <input
                             type="number"
                             value={ilanFiyat}
@@ -628,16 +516,30 @@ class Ilanlar {
                   ) : (
                     <>
                       <img 
-                        src={getImageUrl(ilanlar.ilanResim)} 
-                        alt={ilanlar.ilanAdi} 
+                        src={getImageUrl(ilan.resim)} 
+                        alt={ilan.baslik} 
                         className="profil-ilan-resim" 
                       />
                       <div className="profil-ilan-bilgi">
-                        <h3 className="profil-ilan-baslik">{ilanlar.ilanAdi}</h3>
-                        <p className="profil-ilan-fiyat">{ilanlar.gunlukFiyat} TL </p>
+                        <h3 className="profil-ilan-baslik">{ilan.baslik}</h3>
+                        <p className="profil-ilan-fiyat">{ilan.fiyat} TL</p>
                         <div className="profil-ilan-tarih">
-                          <span>121212</span>
-                          <span>♥ 5</span>
+                          <span>{ilan.tarih}</span>
+                          <span>♥ {ilan.favori}</span>
+                        </div>
+                        <div className="profil-ilan-aksiyonlar">
+                          <button 
+                            className="ilan-duzenle-btn"
+                            onClick={() => handleIlanDuzenle(ilan)}
+                          >
+                            Düzenle
+                          </button>
+                          <button 
+                            className="ilan-sil-btn"
+                            onClick={() => handleIlanSil(ilan.id)}
+                          >
+                            Sil
+                          </button>
                         </div>
                       </div>
                     </>
@@ -662,7 +564,7 @@ class Ilanlar {
                   />
                   <div className="profil-ilan-bilgi">
                     <h3 className="profil-ilan-baslik">{ilan.baslik}</h3>
-                    <p className="profil-ilan-fiyat">{ilan.fiyat} </p>
+                    <p className="profil-ilan-fiyat">{ilan.fiyat} TL</p>
                     <div className="profil-ilan-tarih">
                       <span>Satıcı: {ilan.sahibi}</span>
                     </div>
@@ -695,26 +597,97 @@ class Ilanlar {
               {yorumlar.map(yorum => (
                 <div key={yorum.id} className="yorum-karti">
                   <div className="yorum-ust">
-                  <img 
-                    src={getImageUrl(yorum.avatar)} 
-                    alt={yorum.yazar} 
-                    className="yorum-avatar" 
-                  />
-                  <div>
-                    <h3 className="yorum-yazar">{yorum.yazar}</h3>
-                    <p className="yorum-tarih">{yorum.tarih}</p>
+                    <img 
+                      src={getImageUrl(yorum.avatar)} 
+                      alt={yorum.yazar} 
+                      className="yorum-avatar" 
+                    />
+                    <div>
+                      <h3 className="yorum-yazar">{yorum.yazar}</h3>
+                      <p className="yorum-tarih">{yorum.tarih}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="yorum-puan">
-                  {renderYildizlar(yorum.puan)}
-                  {/* Puan değerini sayısal olarak ekleyen kısım */}
-                  <span className="puan-deger">
-                    {Number(yorum.puan).toFixed(1)}/5.0
-                  </span>
-                </div>
-                <p className="yorum-icerik">{yorum.icerik}</p>
+                  <div className="yorum-puan">
+                    {renderYildizlar(yorum.puan)}
+                  </div>
+                  <p className="yorum-icerik">{yorum.icerik}</p>
+                  
+                  {/* Yorum cevapları */}
+                    {yorum.cevaplar.length > 0 && (
+                      <div className="yorum-cevaplari">
+                        {yorum.cevaplar.map(cevap => (
+                          <div key={cevap.id} className="yorum-cevap">
+                            <div className="yorum-ust">
+                              <img 
+                                src={getImageUrl(cevap.avatar)} 
+                                alt={cevap.yazar} 
+                                className="yorum-avatar" 
+                              />
+                              <div>
+                                <h3 className="yorum-yazar">{cevap.yazar}</h3>
+                                <p className="yorum-tarih">{cevap.tarih}</p>
+                              </div>
+                            </div>
+                            <p className="yorum-icerik">{cevap.icerik}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  
+                  {/* Yorum cevaplama alanı */}
+                  <button 
+                    className="yorum-cevapla-btn"
+                    onClick={() => handleYorumCevap(yorum.id)}
+                  >
+                    {cevaplananYorumId === yorum.id ? 'Cevaplamayı İptal Et' : 'Cevapla'}
+                  </button>
+                  
+                  {cevaplananYorumId === yorum.id && (
+                    <form 
+                      className="yorum-cevap-formu"
+                      onSubmit={(e) => handleCevapGonder(yorum.id, e)}
+                    >
+                      <textarea
+                        placeholder="Cevabınızı buraya yazın..."
+                        value={yorumCevabi}
+                        onChange={(e) => setYorumCevabi(e.target.value)}
+                        required
+                      />
+                      <button type="submit" className="cevap-gonder-btn">
+                        Gönder
+                      </button>
+                    </form>
+                  )}
                 </div>
               ))}
+            </div>
+
+            {/* Yeni Yorum Ekleme Formu */}
+            <div className="yeni-yorum-formu">
+              <h3>Yorum Yap</h3>
+              <form onSubmit={handleYorumEkle}>
+                <div className="puanlama-alani">
+                  <label>Puan:</label>
+                  <div className="yildiz-puanlama">
+                    {renderYildizlar(
+                      geciciPuan || yeniPuan, 
+                      true, 
+                      (puan) => setGeciciPuan(puan),
+                      (puan) => setYeniPuan(puan)
+                    )}
+                    <span className="puan-deger">{geciciPuan || yeniPuan || 0}/5</span>
+                  </div>
+                </div>
+                <textarea
+                  className="yorum-textarea"
+                  placeholder="Yorumunuzu buraya yazın..."
+                  value={yeniYorum}
+                  onChange={(e) => setYeniYorum(e.target.value)}
+                />
+                <button type="submit" className="yorum-gonder-btn">
+                  Yorumu Gönder
+                </button>
+              </form>
             </div>
           </div>
         )}
@@ -726,7 +699,7 @@ class Ilanlar {
             <form className="ayarlar-formu" onSubmit={handleFormSubmit}>
               <div className="avatar-yukle">
                 <img 
-                  src={getImageUrl(kullanici.avatar)} 
+                  src={getImageUrl(profilBilgileri.avatar)} 
                   alt="Profil Önizleme" 
                   className="avatar-onizleme" 
                 />
@@ -870,22 +843,7 @@ class Ilanlar {
           </div>
         )}
       </div>
-       {/* Alt Bilgi */}
-      <footer className="profile__footer">
-        <div className="profile__footer-content">
-          <div className="profile__user">
-            <img src={kullanici.avatar} alt="Profil" className="profile__avatar-small" />
-            <span>{kullanici.isim}</span>
-          </div>
-          <div className="profile__copyright">
-            <span>Son Güncelleme: 25.04.2025</span>
-            <span>© 2025 - Tüm Hakları Saklıdır</span>
-          </div>
-        </div>
-      </footer>
     </div>
-    </>
-    
   );
 };
 

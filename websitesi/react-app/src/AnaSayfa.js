@@ -17,6 +17,18 @@ const kategoriler = [
   "Diğer"
 ];
 
+const kategoriIkonlari = {
+  "Tüm Kategoriler": "📋",
+  "Mobilya": "🪑",
+  "Elektronik": "🖥️",
+  "Ev Eşyaları": "🏠",
+  "Beyaz Eşya": "🧊",
+  "Mutfak Eşyaları": "🍽️",
+  "Dekorasyon": "🎨",
+  "Bahçe": "🌳",
+  "Diğer": "📦"
+};
+
 //-----------------------JAVASCIPT KODLARI BASLANGIC---------------------------------------------------------------------------------------------------------
 const AnaSayfa = () => {
   const [_ARAMAMETNI, fAramaMetni] = useState('');
@@ -35,7 +47,7 @@ const AnaSayfa = () => {
       const ilanlari_cek = async () => {
         try {
           const params = new URLSearchParams();
-          params.append('limit', '15');
+          params.append('limit', '10');
           const url = `http://localhost:5000/api/ilanlar?${params.toString()}`;
           const response = await fetch(url, {
             headers: {
@@ -206,6 +218,17 @@ const AnaSayfa = () => {
 //-----------------------JSX BLOGU BASLANGIC--------------------------------------------------------------------------------------------------------
   return (
     <>
+     <div>
+      <h1>İlanlar</h1>
+      <ul>
+        {mevcutSayfa_ILANLARi.map((ilan) => (
+          <li key={ilan.ilanid}>
+            <Link to={`/ilanlar/${ilan.ilanid}/${encodeURIComponent(ilan.baslik)}`}>{ilan.baslik}</Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+
       <UstCubuk _ARAMAMETNI={_ARAMAMETNI} onAramaChange={handleAramaChange} />
       <div className="page-wrapper">
         <aside className={`kategori-sidebar ${_SIDEBARACIK ? 'acik' : ''}`}>
@@ -217,6 +240,7 @@ const AnaSayfa = () => {
                 className={`kategori-item ${_SECILIKATEGORI === kategori ? 'aktif' : ''}`}
                 onClick={() => kategoriDegistir(kategori)}
               >
+                <span className="kategori-icon">{kategoriIkonlari[kategori]}</span>
                 <span className="kategori-text">{kategori}</span>
                 <span className="kategori-sayi">{kategoriSayilari[kategori]}</span>
               </li>
