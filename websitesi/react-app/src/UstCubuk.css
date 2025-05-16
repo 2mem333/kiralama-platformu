@@ -25,9 +25,37 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1200px;
+  max-width: 1750px;
   margin: 0 auto;
-  gap: 30px;
+  gap: 10px;
+  width: 500%;
+  padding-right: 20px;
+}
+
+/* Site adını en sola yasla */
+.site-logo {
+  margin-right: auto; /* Tüm boşluğu doldurup en sola iter */
+  padding-left: 5%; /* Sol kenardan boşluk */
+}
+
+/* Sağ menüyü düzenle */
+.sag-menu-ogeleri {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* İkonlar arası boşluk */
+  order: 3; /* Arama çubuğundan sonra gelsin */
+  margin-left: auto;
+}
+
+/* Bildirim ve profil sıralaması */
+.bildirim-container {
+  position: static; /* Değiştirildi */
+  order: 1; /* Önce bildirim */
+}
+
+.profil-container {
+  order: 2; /* Sonra profil */
+  margin-left: 15px;
 }
 
 .site-logo a {
@@ -39,6 +67,7 @@
   transition: color 0.2s ease;
   display: flex;
   align-items: center;
+  margin-right: auto;
 }
 
 .site-logo a:hover {
@@ -51,11 +80,12 @@
   align-items: center;
   background-color: #f7f9fa; /* Daha açık ve modern gri */
   border-radius: 12px;
-  padding: 0 16px;
+  padding: 0 15px;
   flex-grow: 1;
-  max-width: 600px;
+  max-width: 450px;
   border: 1px solid rgba(0, 0, 0, 0.07);
   transition: all 0.2s ease;
+  margin-right: auto;
 }
 
 .arama-konteyner-ust:focus-within {
@@ -146,6 +176,213 @@
   font-size: 0.8rem;
 }
 
+.sag-menu-ogeleri {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Tüm öğeleri sağa hizalar */
+  gap: 15px;
+}
+
+.profil-ikon {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+}
+
+.profil-ikon-ust {
+  font-size: 24px;
+  transition: transform 0.2s ease;
+}
+
+.profil-ikon-ust:hover {
+  transform: scale(1.1);
+}
+
+/* Bildirim İkonu Stilleri */
+.bildirim-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.bildirim-icon {
+  position: relative;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #333;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.bildirim-icon:hover {
+  background: #e9ecef;
+  transform: scale(1.05);
+}
+
+.bildirim-sayaci {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Bildirim Dropdown */
+.bildirim-dropdown {
+  position: absolute;
+  right: 0;
+  top: 50px;
+  background: white;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  border: 1px solid #dee2e6;
+}
+
+.bildirim-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #dee2e6;
+  background: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}
+
+.bildirim-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #212529;
+}
+
+.kapat-btn {
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #6c757d;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.kapat-btn:hover {
+  color: #495057;
+}
+
+.bildirim-listesi {
+  padding: 8px 0;
+}
+
+.bildirim-item {
+  padding: 12px 16px;
+  margin: 4px 8px;
+  border-radius: 6px;
+  background: #f9f9fa;
+  transition: background 0.2s ease;
+}
+
+.bildirim-item.okunmamis {
+  background: #e7f5ff;
+  border-left: 3px solid #228be6;
+}
+
+.bildirim-item:hover {
+  background: #dadada;
+}
+
+.bildirim-mesaj {
+  font-size: 0.9rem;
+  color: #212529;
+  margin-bottom: 4px;
+}
+
+.bildirim-tarih {
+  font-size: 0.75rem;
+  color: #4d4c4c;
+}
+
+.bildirim-okundu {
+  display: flex;
+  justify-content: center; /* yatay ortala */
+  padding: 8px;
+}
+
+.teklif-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.onayla-btn {
+  background: #28a745;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.reddet-btn {
+  background: #dc3545;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.teklif-durum {
+  font-size: 0.9em;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+.teklif-durum.onaylandı {
+  background: #d4edda;
+  color: #155724;
+}
+
+.teklif-durum.reddedildi {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.teklif-actions {
+  display: flex; /* Butonları yan yana gösterir */
+  gap: 10px; /* Butonlar arası boşluk */
+  margin-top: 10px;
+}
+
+.onayla-btn, .reddet-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.onayla-btn {
+  background: #4CAF50; /* Yeşil */
+  color: white;
+}
+
+.reddet-btn {
+  background: #f44336; /* Kırmızı */
+  color: white;
+}
+
 /* Mobil cihazlar için küçük ayarlamalar */
 @media (max-width: 768px) {
   .ust-cubuk {
@@ -194,6 +431,65 @@
   .kullanici-butonu span {
     display: none;
   }
+
+  /* Sağ menüyü düzenle */
+  .sag-menu-ogeleri {
+    gap: 8px; /* İkonlar arası boşluğu azalt */
+    padding-right: 10px; /* Sağ kenardan boşluk ekle */
+  }
+
+  /* Bildirim konteynerini düzelt */
+  .bildirim-container {
+    position: static; /* Fixed pozisyonu kaldır */
+  }
+
+  /* Profil ikonu boyutunu küçült */
+  .profil-ikon {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  /* Bildirim ikonu boyutunu küçült */
+  .bildirim-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Ana konteynırın içeriğini sıkıştır */
+  .ust-cubuk-icerik {
+    justify-content: space-between; /* Elemanları eşit dağıt */
+    padding: 0 10px;
+  }
+
+  .sag-menu-ogeleri {
+    gap: 8px; /* İkonlar arası boşluğu azalt */
+    padding-right: 10px; /* Sağ kenardan boşluk ekle */
+  }
+
+  /* Bildirim konteynerini düzelt */
+  .bildirim-container {
+    position: static; /* Fixed pozisyonu kaldır */
+  }
+
+  /* Profil ikonu boyutunu küçült */
+  .profil-ikon {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  /* Bildirim ikonu boyutunu küçült */
+  .bildirim-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Ana konteynırın içeriğini sıkıştır */
+  .ust-cubuk-icerik {
+    justify-content: space-between; /* Elemanları eşit dağıt */
+    padding: 0 10px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -202,21 +498,43 @@
     height: 56px; /* Küçük mobil cihazlar için en küçük yükseklik */
     background-size: 480px 56px; /* Mobil boyutu */
   }
+
+  .sag-menu-ogeleri {
+    gap: 5px;
+    padding-right: 5px;
+  }
+
+  .site-logo a {
+    font-size: 1.1rem; /* Logo yazı boyutunu küçült */
+    padding-left: 2%;
+  }
+
+  .bildirim-sayaci {
+    padding: 2px 6px; /* Bildirim sayacını küçült */
+    font-size: 0.65rem;
+  }
   
   .site-logo a {
-    font-size: 1.2rem;
+    font-size: 1.1rem; /* Logo yazı boyutunu küçült */
+    padding-left: 2%;
   }
   
   .sag-menu-ogeleri {
-    gap: 8px;
+    gap: 5px;
+    padding-right: 5px;
   }
   
   .sag-menu-buton {
     width: 36px;
     height: 36px;
   }
+
+  .bildirim-sayaci {
+    padding: 2px 6px; /* Bildirim sayacını küçült */
+    font-size: 0.65rem;
+  }
 }
 
 .ust-cubuk {
-  background-image: url('C:\Users\Barış\Desktop\ustcubuk2.png');
+  background-image: url("C:\Users\Berk\kiralama-platformu\websitesi\react-app\public\ustcubuk2.png");
 }

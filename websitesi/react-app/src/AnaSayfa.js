@@ -17,17 +17,6 @@ const kategoriler = [
   "Diğer"
 ];
 
-const kategoriIkonlari = {
-  "Tüm Kategoriler": "📋",
-  "Mobilya": "🪑",
-  "Elektronik": "🖥️",
-  "Ev Eşyaları": "🏠",
-  "Beyaz Eşya": "🧊",
-  "Mutfak Eşyaları": "🍽️",
-  "Dekorasyon": "🎨",
-  "Bahçe": "🌳",
-  "Diğer": "📦"
-};
 
 //-----------------------JAVASCIPT KODLARI BASLANGIC---------------------------------------------------------------------------------------------------------
 const AnaSayfa = () => {
@@ -47,7 +36,7 @@ const AnaSayfa = () => {
       const ilanlari_cek = async () => {
         try {
           const params = new URLSearchParams();
-          params.append('limit', '10');
+          params.append('limit', '15');
           const url = `http://localhost:5000/api/ilanlar?${params.toString()}`;
           const response = await fetch(url, {
             headers: {
@@ -74,11 +63,45 @@ const AnaSayfa = () => {
       ilanlari_cek();
     }, []);
 
-  const getImageUrl = (resimYolu) => {
-    if (!resimYolu) {
-      return placeholderImage;
+ const getImageUrl = (resimYolu) => {
+  if (!resimYolu) {
+    return placeholderImage;
+  }
+  
+  // parseImages fonksiyonunu kullanarak URL'leri doğru şekilde ayrıştır
+  const imageUrls = parseImages(resimYolu);
+  
+  // Eğer geçerli bir URL varsa ilkini döndür, yoksa placeholder göster
+  return imageUrls.length > 0 ? imageUrls[0] : placeholderImage;
+};
+
+  const parseImages = (resimYolu) => {
+    try {
+      if (!resimYolu) return []; // Boş string kontrolü eklendi
+      
+      // 1. Tüm gereksiz karakterleri temizle
+      const cleanString = resimYolu
+        .replace(/^[\s"{]+/g, '')  // Baştaki {, ", boşluk
+        .replace(/[\s"}]+$/g, '')   // Sondaki }, ", boşluk
+        .replace(/\\/g, '')        // Ters slash'ları kaldır
+        .replace(/"/g, '');        // Kalan tırnakları temizle
+
+      // 2. URL'leri virgülle ayır ve geçerli olanları filtrele
+      return cleanString.split(',')
+        .map(url => url.trim())
+        .filter(url => {
+          if (!url) return false; // Boş URL kontrolü eklendi
+          try {
+            new URL(url);
+            return true;
+          } catch {
+            return false;
+          }
+        });
+    } catch (e) {
+      console.error('Resim parse hatası:', e);
+      return [];
     }
-    return resimYolu;
   };
 
   const filtreliVeSirali_ILANLAR = () => {
@@ -218,17 +241,6 @@ const AnaSayfa = () => {
 //-----------------------JSX BLOGU BASLANGIC--------------------------------------------------------------------------------------------------------
   return (
     <>
-     <div>
-      <h1>İlanlar</h1>
-      <ul>
-        {mevcutSayfa_ILANLARi.map((ilan) => (
-          <li key={ilan.ilanid}>
-            <Link to={`/ilanlar/${ilan.ilanid}/${encodeURIComponent(ilan.baslik)}`}>{ilan.baslik}</Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-
       <UstCubuk _ARAMAMETNI={_ARAMAMETNI} onAramaChange={handleAramaChange} />
       <div className="page-wrapper">
         <aside className={`kategori-sidebar ${_SIDEBARACIK ? 'acik' : ''}`}>
@@ -239,8 +251,7 @@ const AnaSayfa = () => {
                 key={kategori} 
                 className={`kategori-item ${_SECILIKATEGORI === kategori ? 'aktif' : ''}`}
                 onClick={() => kategoriDegistir(kategori)}
-              >
-                <span className="kategori-icon">{kategoriIkonlari[kategori]}</span>
+              >             
                 <span className="kategori-text">{kategori}</span>
                 <span className="kategori-sayi">{kategoriSayilari[kategori]}</span>
               </li>
@@ -305,7 +316,7 @@ const AnaSayfa = () => {
                       alt={ilan.baslik} 
                       className="ilan-resmi" 
                     />
-                    <span className="ilan-durum">{ilan.durum}</span>
+                    {/* <span className="ilan-durum">{ilan.durum}</span> */}
                   </div>
                   <div className="ilan-bilgileri">
                     <div className="ilan-ust-bilgi">
@@ -314,7 +325,7 @@ const AnaSayfa = () => {
                         <span className="ilan-fiyat">{ilan.fiyat} TL</span>
                       </div>
                       <div className="ilan-detaylar">
-                        <p className="ilan-lokasyon">📍 {ilan.lokasyon}</p>
+                        <p className="ilan-lokasyon"> {ilan.lokasyon}</p>
                         <div className="ilan-durum-tarih">
                           <span className="ilan-tarih">{ilan.tarih}</span>
                         </div>
