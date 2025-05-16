@@ -1,0 +1,312 @@
+/* GENEL RESET */
+* {
+  box-sizing: border-box;
+}
+
+/* Konteyner */
+.sss-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #333;
+}
+
+/* Başlık Alanı */
+.sss-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.sss-header h1 {
+  font-size: 32px;
+  color: #3498db;
+  margin-bottom: 10px;
+}
+
+.sss-header p {
+  font-size: 16px;
+  color: #7f8c8d;
+}
+
+/* Arama ve Filtreleme */
+.sss-filtre-alani {
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.arama-kutusu {
+  position: relative;
+}
+
+.arama-kutusu input {
+  width: 100%;
+  padding: 12px 40px 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.arama-kutusu input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.arama-ikonu {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #95a5a6;
+  cursor: pointer;
+}
+
+/* Kategori Seçimi */
+.kategori-secimi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.kategori-buton {
+  padding: 8px 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  color: #555;
+}
+
+.kategori-buton:hover {
+  background-color: #e9ecef;
+}
+
+.kategori-buton.aktif {
+  background-color: #3498db;
+  color: #fff;
+  border-color: #3498db;
+}
+
+/* SSS Listesi */
+.sss-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.sss-kart {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.sss-kart:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.sss-kart.acik {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-color: #3498db;
+}
+
+.sss-soru {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.sss-soru:hover {
+  background-color: #f9f9f9;
+}
+
+.sss-kart.acik .sss-soru {
+  background-color: #f0f7fc;
+  border-bottom: 1px solid #e1f0fa;
+}
+
+.sss-soru h3 {
+  font-size: 17px;
+  color: #2c3e50;
+  margin: 0;
+  font-weight: 600;
+}
+
+.ikon-toggle {
+  font-size: 22px;
+  color: #3498db;
+  font-weight: bold;
+  transition: transform 0.3s;
+}
+
+.sss-kart.acik .ikon-toggle {
+  transform: rotate(180deg);
+}
+
+.sss-cevap {
+  padding: 15px 20px;
+  background-color: #fcfdff;
+  border-top: 1px solid #f0f0f0;
+  line-height: 1.6;
+}
+
+.sss-cevap p {
+  margin: 0;
+  color: #444;
+  font-size: 15px;
+}
+
+/* Sonuç Bulunamadı */
+.sonuc-yok {
+  text-align: center;
+  padding: 30px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.sonuc-yok p {
+  margin-bottom: 15px;
+  color: #7f8c8d;
+}
+
+.sonuc-yok button {
+  padding: 10px 20px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sonuc-yok button:hover {
+  background-color: #2980b9;
+}
+
+/* İletişim */
+.sss-iletisim {
+  margin-top: 40px;
+  padding: 25px;
+  background-color: #f0f7fc;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #e1f0fa;
+}
+
+.sss-iletisim h3 {
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+.sss-iletisim p {
+  color: #7f8c8d;
+  margin-bottom: 20px;
+}
+
+.iletisim-butonlar {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.iletisim-buton {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 5px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.iletisim-buton.eposta {
+  background-color: #3498db;
+  color: white;
+}
+
+.iletisim-buton.eposta:hover {
+  background-color: #2980b9;
+}
+
+.iletisim-buton.telefon {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.iletisim-buton.telefon:hover {
+  background-color: #27ae60;
+}
+
+/* Mobil - Tablet */
+@media (max-width: 768px) {
+  .sss-header h1 {
+    font-size: 24px;
+  }
+
+  .sss-soru h3 {
+    font-size: 15px;
+  }
+
+  .kategori-secimi {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .kategori-buton {
+    width: 100%;
+    text-align: center;
+  }
+
+  .iletisim-butonlar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .iletisim-buton {
+    width: 100%;
+  }
+}
+
+/* Mobil - Küçük Ekran */
+@media (max-width: 480px) {
+  .sss-header h1 {
+    font-size: 20px;
+  }
+
+  .sss-header p {
+    font-size: 14px;
+  }
+
+  .sss-soru {
+    padding: 14px;
+  }
+
+  .sss-soru h3 {
+    font-size: 14px;
+  }
+
+  .sss-cevap {
+    padding: 12px 15px;
+  }
+
+  .arama-kutusu input {
+    font-size: 14px;
+  }
+}

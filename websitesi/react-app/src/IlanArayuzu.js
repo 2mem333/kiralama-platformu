@@ -97,7 +97,7 @@ function IlanArayuzu() {
   useEffect(() => {
     const ilaniGetir = async () => {
       try {
-  yuklemeAyarla(true);
+        yuklemeAyarla(true);
         const yanit = await fetch(`http://localhost:5000/api/ilanlar?ilanid=${ilanid}`);
         
         if (!yanit.ok) throw new Error(`HTTP hata! durum kodu: ${yanit.status}`);
@@ -130,7 +130,7 @@ function IlanArayuzu() {
         hataAyarla(`Veri yüklenemedi: ${err.message}`);
         ilanAyarla(null);
       } finally {
-  yuklemeAyarla(false);
+        yuklemeAyarla(false);
       }
     };
     
