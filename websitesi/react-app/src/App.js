@@ -4,10 +4,9 @@ import AnaSayfa from './AnaSayfa';
 import GirisPaneli from './GirisPaneli';
 import KayitPaneli from './KayitPaneli';
 import IlanOlusturma from './ilanolusturma';
+import Profil from './ProfilSayfa'; // Profil sayfasının doğru yolu
+import KullaniciProfil from './KullaniciProfil';
 import IlanArayuzu from './IlanArayuzu';
-import PremiumUyelik from './PremiumUyelik';
-import Profiller from './Profiller';
-import IlanYonetimi from './IlanYonetimi';
 
 function App() {
   return (
@@ -20,9 +19,8 @@ function App() {
         <Route path="/kayit" element={<KayitPaneli />} />
         <Route path="/ilanolustur" element={<IlanOlusturma/>} />
         <Route path="/ilanlar/:ilanid/:baslik" element={<IlanArayuzu />} />
-        <Route path="/uyelik" element={<PremiumUyelik />} /> 
-        <Route path="/profiller/:kullaniciid/" element={<Profiller/>} />
-        <Route path="/ilan-yonetimi/:kullaniciid" element={<IlanYonetimi />} />
+        <Route path="/profil" element={<Profil />} /> {/* Profil sayfası */}
+        <Route path="/kullaniciprofil" element={<KullaniciProfil />} /> 
       </Routes>
     </Router>
   );
