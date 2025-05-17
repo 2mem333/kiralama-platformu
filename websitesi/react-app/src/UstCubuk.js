@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import './UstCubuk.css';
 import { Link } from 'react-router-dom';
 
-const UstCubuk = ({ aramaMetni, onAramaChange }) => {
+const UstCubuk = ({ aramaMetni, onAramaChange,kullaniciId }) => {
 
   // Yeni eklenen bildirim state'leri
     const [bildirimGoster, setBildirimGoster] = useState(false);
@@ -175,11 +175,11 @@ const UstCubuk = ({ aramaMetni, onAramaChange }) => {
             )}
           </div>
           {/* Profil ikonu ekliyoruz */}
-          <div className='profil-container'>
-            <a href="/profiller/17" className="profil-ikon">
-              <span className="profil-ikon-ust">👤</span>
-            </a>
-          </div>
+       <div className='profil-container'>
+  <a href={kullaniciId ? `/profiller/${kullaniciId}` : '/giris'} className="profil-ikon">
+    <span className="profil-ikon-ust">👤</span>
+  </a>
+</div>
         </div>
       </div>
     </header>
