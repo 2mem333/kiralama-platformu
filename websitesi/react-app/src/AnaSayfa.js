@@ -1,7 +1,7 @@
 import React, { useState,useEffect } from 'react';
 import './AnaSayfa.css';
 import UstCubuk from './UstCubuk';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 
 const placeholderImage = "https://via.placeholder.com/300x200?text=Ürün+Görseli";
 
@@ -30,9 +30,31 @@ const AnaSayfa = () => {
   const [sayfaBasiIlanSayisi, setSayfaBasiIlanSayisi] = useState(20);
   const [aktifSayfa, setAktifSayfa] = useState(1);
 
+  const [_KULLANICIID, fKullaniciId] = useState(null);
+  const navigate = useNavigate();
+  
+  const cikisYap = () => {
+    localStorage.removeItem('token');  // Tokeni sil
+    navigate('/giris');
+  };
 
 //------------Başlangıçta ilanları çekebilmek için (Backend)---------
   useEffect(() => { 
+
+    const tokenKontrol = async() =>{
+const token = localStorage.getItem('token');
+if (token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    fKullaniciId(payload.kullaniciid);
+  } catch (error) {
+    console.error('Token parsing error:', error);
+    // Token bozuksa temizleyebilirsin
+    localStorage.removeItem('token');
+  }
+}
+    }; tokenKontrol();
+
       const ilanlari_cek = async () => {
         try {
           const params = new URLSearchParams();
@@ -241,7 +263,11 @@ const AnaSayfa = () => {
 //-----------------------JSX BLOGU BASLANGIC--------------------------------------------------------------------------------------------------------
   return (
     <>
-      <UstCubuk _ARAMAMETNI={_ARAMAMETNI} onAramaChange={handleAramaChange} />
+    <div>
+      <h1>Giriş yapan kullanıcı ID: {_KULLANICIID}</h1>
+      <button onClick={cikisYap}>Çıkış Yap</button>
+    </div>
+      <UstCubuk aramaMetni={_ARAMAMETNI} onAramaChange={handleAramaChange} kullaniciId={_KULLANICIID} />
       <div className="page-wrapper">
         <aside className={`kategori-sidebar ${_SIDEBARACIK ? 'acik' : ''}`}>
           <h2 className="sidebar-baslik">Kategoriler</h2>

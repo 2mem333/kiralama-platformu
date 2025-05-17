@@ -24,7 +24,8 @@ const [ilanBaslik, setIlanBaslik] = useState('');
 const [ilanFiyat, setIlanFiyat] = useState('');
 const navigate = useNavigate();
 const [previewUrl, setPreviewUrl] = useState(null);
-const [currentUserId, setCurrentUserId] = useState(null);
+
+const [_TOKENKULLANICIID, fTokenKullaniciId] = useState(null); //sisteme giris yapmis tokende yazan kullanici id
 
 class KullaniciBilgileri {
   constructor() {
@@ -171,21 +172,24 @@ const [yorumlar, setYorumlar] = useState(_DEGERLENDIRMELER);
     }
   };
 
-useEffect(() => {
-  const fetchCurrentUser = async () => {
-    try {
-      const params = new URLSearchParams({ kullaniciid });
-      const res = await fetch(`http://localhost:5000/api/profiller?${params}`);
-      const data = await res.json();
-      setCurrentUserId(data.kullaniciid);
-    } catch (err) {
-      console.error('Kullanıcı bilgisi alınamadı:', err);
-    }
-  };
-  fetchCurrentUser();
-}, []);
 
 useEffect(() => {
+  
+  //kullanıcının sisteme giriş yapmışsa, id'si çekilir
+      const tokenKontrol = async() =>{ 
+const token = localStorage.getItem('token');
+if (token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    fTokenKullaniciId(payload.kullaniciid);
+  } catch (error) {
+    console.error('Token parsing error:', error);
+    // Token bozuksa temizleyebilirsin
+    localStorage.removeItem('token');
+  }
+}
+    }; tokenKontrol();
+
     const fetchKullanici = async () => {
       try {
         const params = new URLSearchParams({ kullaniciid });
@@ -292,19 +296,6 @@ useEffect(() => {
     const puanOrtalamasi = (_DEGERLENDIRMELER.length > 0)
   ? (_DEGERLENDIRMELER.reduce((toplam, d) => toplam + d.puan, 0) / _DEGERLENDIRMELER.length).toFixed(1)
   : "0.0";
-
-
-  const [profilBilgileri, setProfilBilgileri] = useState({
-    isim: "deneme",
-    konum: "İstanbul, Türkiye",
-    avatar: "/profil-avatar.jpg",
-    durum: "Premium Üye",
-    hakkimda: "10 yıldır ikinci el eşya alım satımı yapıyorum. Özellikle antika mobilyalara ilgim var. Satın aldığım ve sattığım ürünlerin kaliteli olmasına özen gösteririm.",
-    telefon: "+90 555 123 45 67",
-    email: "ahmet.yilmaz@example.com",
-    kayitTarihi: "12.03.2018",
-    dogumTarihi: "15.08.1985"
-  });
 
    // Ayarlar formu state'i güncellendi
     const [ayarlarFormu, setAyarlarFormu] = useState({
@@ -533,7 +524,7 @@ return (
         <div className="profil-konum">
           <i className="fas fa-map-marker-alt"></i> {_KULLANICI.adres}
         </div>
-        <div className="profil-durum">{profilBilgileri.durum}</div>
+        <div className="profil-durum">{"DURUM"}</div>
         
         {/* İstatistikler */}
         <div className="profil-istatistikler">
@@ -542,7 +533,7 @@ return (
             <div className="istatistik-baslik">İlan</div>
           </div>
           {/* Sadece kendi profili görüntüleniyorsa Favori istatistiğini göster */}
-          {currentUserId === parseInt(kullaniciid) && (
+          {_TOKENKULLANICIID === parseInt(kullaniciid) && (
             <div className="istatistik-kutu">
               <div className="istatistik-deger">{favoriIlanlar.length}</div>
               <div className="istatistik-baslik">Favori</div>
@@ -590,7 +581,7 @@ return (
           Yorumlar ({_DEGERLENDIRMELER.length})
         </button>
         {/* Sadece kendi profiline özel sekmeler */}
-        {currentUserId === parseInt(kullaniciid) && (
+        {_TOKENKULLANICIID === parseInt(kullaniciid) && (
           <>
             <button 
               className={`sekme-btn ${aktifSekme === 'favoriler' ? 'aktif' : ''}`}
@@ -708,7 +699,7 @@ return (
         )}
         
         {/* Favoriler Sekmesi */}
-        {aktifSekme === 'favoriler' && currentUserId === parseInt(kullaniciid) && (
+        {aktifSekme === 'favoriler' && _TOKENKULLANICIID === parseInt(kullaniciid) && (
           <div className="favoriler-sekme">
             <h2 className="hakkimda-baslik">Favori İlanlarım</h2>
             <div className="profil-favoriler">
@@ -779,7 +770,7 @@ return (
         )}
         
         {/* Ayarlar Sekmesi */}
-        {aktifSekme === 'ayarlar' && currentUserId === parseInt(kullaniciid) && (
+        {aktifSekme === 'ayarlar' && _TOKENKULLANICIID === parseInt(kullaniciid) && (
           <div className="ayarlar-sekme">
             <h2 className="hakkimda-baslik">Profil Ayarları</h2>
             <form className="ayarlar-formu" onSubmit={handleFormSubmit}>
@@ -820,7 +811,7 @@ return (
                   type="text"
                   className="form-input"
                   name="isim"
-                  value={ayarlarFormu.isim}
+                  value={_KULLANICI.ad} 
                   onChange={handleFormChange}
                 />
               </div>
@@ -831,7 +822,7 @@ return (
                   type="email"
                   className="form-input"
                   name="email"
-                  value={ayarlarFormu.email}
+                  value={_KULLANICI.email}
                   onChange={handleFormChange}
                 />
               </div>
@@ -842,7 +833,7 @@ return (
                   type="tel"
                   className="form-input"
                   name="telefon"
-                  value={ayarlarFormu.telefon}
+                  value={_KULLANICI.telefonNumarasi}
                   onChange={handleFormChange}
                 />
               </div>
@@ -852,7 +843,7 @@ return (
                 <textarea
                   className="form-input form-textarea"
                   name="hakkimda"
-                  value={ayarlarFormu.hakkimda}
+                  value={_PROFIL.hakkinda}
                   onChange={handleFormChange}
                 />
               </div>

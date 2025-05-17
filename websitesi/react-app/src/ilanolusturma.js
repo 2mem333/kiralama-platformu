@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { initializeApp } from "firebase/app";
 import {
   getStorage,
@@ -21,6 +22,9 @@ const IlanOlusturma = () => {
   const [_URUNFOTOGRAFLARI, fUrunFotograflari] = useState([]);
   const [errors, setErrors] = useState({});
 
+  const navigate = useNavigate();
+  const [_TOKENKULLANICIID, fTokenKullaniciId] = useState(null); //sisteme giris yapmis tokende yazan kullanici id
+
   const categories = [
     'Elektronik', 'Ev Eşyaları', 'Bahçe Aletleri', 'Spor Ekipmanları',
     'Müzik Aletleri', 'Kitaplar', 'Oyunlar', 'Diğer'
@@ -29,6 +33,27 @@ const IlanOlusturma = () => {
     'Sıfır ayarında', 'Yeni gibi', 'Az kullanılmış', 'Orta',
     'Biraz eski', 'Eski'
   ];
+
+  useEffect(() => {
+    //kullanıcının sisteme giriş yapmışsa, id'si çekilir
+        const tokenKontrol = async() =>{ 
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      fTokenKullaniciId(payload.kullaniciid);
+    } catch (error) {
+      console.error('Token parsing error:', error);
+      localStorage.removeItem('token');
+      navigate("/giris");
+    }
+  }
+  else
+  {
+navigate("/giris");
+  }
+      }; tokenKontrol();
+        },);
 //--------------FIREBASE CONFIG---------------------- !BU CONGIF SERVER TARAFINA TASINMALIDIR, GUVENLIK AMACLI
   const firebaseConfig = {
     apiKey: "AIzaSyDMLIXsdKpDhhEDXQiYWXZWRTS1-FCOdcI",
@@ -128,6 +153,7 @@ const IlanOlusturma = () => {
       resim:     imageUrls,     
       durum:     _URUNDURUMU,
       aciklama:  _ACIKLAMA,
+      sahipid: _TOKENKULLANICIID,
       tarih:     '2025-04-2026'
     };
 //-----------------SERVER ILE HABERLESME (ARKA YUZ KODU)----------------

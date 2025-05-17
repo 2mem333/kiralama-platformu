@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './GirisPaneli.css'; // Bu dosyayı ayrıca oluşturacağız
 import { useNavigate } from 'react-router-dom';
 
 
-const GirisPaneli = () => {
+const GirisPaneli = ({ onLoginSuccess }) => {
   const [eposta, setEposta] = useState('');
   const [sifre, setSifre] = useState('');
   const [sifreGoster, setSifreGoster] = useState(false);
@@ -11,6 +11,22 @@ const GirisPaneli = () => {
   const [hataMesaji, setHataMesaji] = useState('');
   const [mesaj, setMesaj] = useState('');
   const [yukleniyor, setYukleniyor] = useState(false);
+
+   
+  useEffect(() => { //eger zaten giris yapilmissa anasayfa'ya yonlendirir
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp * 1000 > Date.now()) {
+          onLoginSuccess(payload);
+          navigate('/anasayfa');
+        }
+      } catch {
+        // token bozuksa sessizce geç
+      }
+    }
+  }, []);
 
   const navigate = useNavigate();
 
@@ -41,10 +57,13 @@ const GirisPaneli = () => {
       });
 
       const veri = await yanit.json();
-      
       if (yanit.status === 200) {
-        setMesaj('Giriş başarılı: ' + eposta);
+      setMesaj('Giriş başarılı: ' + eposta);
+      localStorage.setItem('token', veri.token);
+      const payload = JSON.parse(atob(veri.token.split('.')[1]));
+      onLoginSuccess(payload); // App'e aktar
         setHataMesaji('');
+            navigate('/anasayfa');
       } else {
         setHataMesaji('E-posta veya şifreniz hatalı!');
         setMesaj('');
