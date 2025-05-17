@@ -12,6 +12,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { Pool } = require('pg');
+const jwt = require('jsonwebtoken'); //token olusturur
+const SECRET_KEY = '1337';
+
 
 const app = express();
 const port = 5000;
@@ -25,6 +28,14 @@ app.use((req, res, next) => {
   next();
 });
 //????
+
+const sha256 = async(metin) => {
+  const msgBuffer = new TextEncoder().encode(metin);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
 
 // PostgreSQL bağlantısı
 const pool = new Pool({
@@ -65,12 +76,16 @@ const pool_profil = new Pool({
 
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
-
+  const hashSifre = await sha256(password);
   try {
-    const result = await pool.query('SELECT * FROM kullanicilar WHERE eposta = $1 AND sifre = $2;', [email, password]);
+    const result = await pool.query('SELECT * FROM kullanicilar WHERE eposta = $1 AND sifre = $2;', [email, hashSifre]);
+    const kullanici = result.rows[0]; // ilk satır
 
     if (result.rows.length > 0) { //eger sorgu dogru yanit dondururse.
-      res.status(200).json({ message: 'dogru' });
+      const token = jwt.sign({ kullaniciid: kullanici.id }, SECRET_KEY, { expiresIn: '24h' });
+      console.log(kullanici.eposta);
+      console.log(kullanici.id);
+      res.status(200).json({ message: 'dogru', token: token});
     } else {
       res.status(401).json({ message: 'hatali' });
     }
@@ -82,11 +97,11 @@ app.post('/api/login', async (req, res) => {
 
 app.post('/api/kayit', async (req, res) => {
   const { eposta, ad,soyad,dogumTarihi,telefon,adres,postaKodu,sifre } = req.body;
-
+  const hashSifre = await sha256(sifre);
   try {
     const result = await pool.query(
       'INSERT INTO kullanicilar (eposta, ad, soyad, dogumtarihi, telefon, adres, postakodu, sifre) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-      [eposta, ad, soyad, dogumTarihi, telefon, adres, postaKodu, sifre]
+      [eposta, ad, soyad, dogumTarihi, telefon, adres, postaKodu, hashSifre]
     );
     
     // Ekleme başarılı olduysa, 200 döndür
@@ -242,7 +257,7 @@ app.get('/api/degerlendirmeler', async (req, res) => {
 });
 
 app.post('/api/ilanolustur', async (req, res) => {
-  const { baslik, fiyat,konum,resim,durum,aciklama,tarih} = req.body;
+  const { baslik, fiyat,konum,resim,durum,aciklama,tarih,sahipid} = req.body;
   console.log('Baslik:', baslik);
   console.log('Fiyat:', fiyat);
   console.log('Konum:', konum);
@@ -253,8 +268,8 @@ app.post('/api/ilanolustur', async (req, res) => {
   
   try {
     const result = await pool2.query(
-      'INSERT INTO ilanlar (baslik, fiyat, lokasyon, resim, durum, aciklama, tarih,sahipid) VALUES ($1, $2, $3, $4, $5, $6, $7,4)',
-      [baslik, fiyat,konum,resim,durum,aciklama,tarih]
+      'INSERT INTO ilanlar (baslik, fiyat, lokasyon, resim, durum, aciklama, tarih,sahipid) VALUES ($1, $2, $3, $4, $5, $6, $7,$8)',
+      [baslik, fiyat,konum,resim,durum,aciklama,tarih,sahipid]
     );
     
     // Ekleme başarılı olduysa, 200 döndür
