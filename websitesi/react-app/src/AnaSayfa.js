@@ -2,7 +2,6 @@ import React, { useState,useEffect } from 'react';
 import './AnaSayfa.css';
 import UstCubuk from './UstCubuk';
 import { Link,useNavigate } from 'react-router-dom';
-
 const placeholderImage = "https://via.placeholder.com/300x200?text=Ürün+Görseli";
 
 const kategoriler = [
@@ -29,8 +28,7 @@ const AnaSayfa = () => {
   const [_ILANLAR, fIlanlar] = useState([]);
   const [sayfaBasiIlanSayisi, setSayfaBasiIlanSayisi] = useState(20);
   const [aktifSayfa, setAktifSayfa] = useState(1);
-
-  const [_KULLANICIID, fKullaniciId] = useState(null);
+ const [_KULLANICIID, fKullaniciId] = useState(null);
   const navigate = useNavigate();
   
   const cikisYap = () => {
@@ -41,7 +39,7 @@ const AnaSayfa = () => {
 //------------Başlangıçta ilanları çekebilmek için (Backend)---------
   useEffect(() => { 
 
-    const tokenKontrol = async() =>{
+     const tokenKontrol = async() =>{
 const token = localStorage.getItem('token');
 if (token) {
   try {
@@ -263,11 +261,11 @@ if (token) {
 //-----------------------JSX BLOGU BASLANGIC--------------------------------------------------------------------------------------------------------
   return (
     <>
-    <div>
+        <div>
       <h1>Giriş yapan kullanıcı ID: {_KULLANICIID}</h1>
       <button onClick={cikisYap}>Çıkış Yap</button>
     </div>
-      <UstCubuk aramaMetni={_ARAMAMETNI} onAramaChange={handleAramaChange} kullaniciId={_KULLANICIID} />
+      <UstCubuk _ARAMAMETNI={_ARAMAMETNI} onAramaChange={handleAramaChange} />
       <div className="page-wrapper">
         <aside className={`kategori-sidebar ${_SIDEBARACIK ? 'acik' : ''}`}>
           <h2 className="sidebar-baslik">Kategoriler</h2>

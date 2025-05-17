@@ -1,4 +1,4 @@
-/* AnaSayfa.css */
+/* AnaSayfa.css - Kategori Sidebar Sabit Olacak Şekilde Düzenlenmiş */
 
 /* Temel Reset ve Global Stiller */
 * {
@@ -18,32 +18,42 @@ body {
   line-height: 1.6;
 }
 
-/* Page Wrapper */
+/* Page Wrapper - UstCubuk'un altında kalmayacak şekilde üst kenar boşluğu eklendi */
 .page-wrapper {
   display: grid;
   grid-template-columns: 260px 1fr;
   gap: 2rem;
-  max-width: 1440px;
+  max-width: 1680px; /* Genişletilmiş maksimum genişlik - 1440px'ten 1680px'e */
   margin: 0 auto;
   padding: 1rem;
+  padding-top: 90px; /* UstCubuk'un height'i + ek boşluk (80px + 10px) */
+  position: relative; /* Pozisyon referansı */
 }
 
 @media (max-width: 768px) {
   .page-wrapper {
     grid-template-columns: 1fr;
+    padding-top: 70px; /* Mobil için UstCubuk'un height'i + ek boşluk (60px + 10px) */
   }
 }
 
-/* Sidebar */
+/* Sidebar - Fixed Pozisyon Verildi */
 .kategori-sidebar {
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  height: fit-content;
+  position: fixed; /* Önemli değişiklik: fixed pozisyon eklendi */
+  top: 90px; /* UstCubuk'un altına gelecek şekilde pozisyonlandı (80px + 10px) */
+  left: calc((100% - 1680px) / 2 + 1rem); /* Sayfa merkezi hesabı - 1440px yerine 1680px */
+  width: 260px; /* Genişlik sabit kalmalı */
+  height: calc(100vh - 110px); /* Görünür alanın tamamı - üst boşluk */
+  overflow-y: auto; /* İçerik fazla olursa scroll */
   transition: left 0.3s ease;
+  z-index: 99; /* UstCubuk'un arkasında kalması için (UstCubuk'un z-index'i 100) */
 }
 
+/* Sidebar Açık Durumu */
 .kategori-sidebar.acik {
   left: 0;
 }
@@ -104,6 +114,11 @@ body {
   cursor: pointer;
   font-weight: 500;
   transition: background 0.2s ease;
+  position: fixed; /* Mobil için */
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  z-index: 101; /* UstCubuk'un üstüne çıkması için */
 }
 
 .mobil-menu-btn:hover {
@@ -113,15 +128,44 @@ body {
 @media (max-width: 768px) {
   .kategori-sidebar {
     position: fixed;
-    top: 0;
-    left: -260px;
+    top: 60px; /* Mobil için UstCubuk'un height */
+    left: -260px; /* Gizlenecek */
     width: 260px;
-    height: 100vh;
+    height: calc(100vh - 60px); /* Ekran yüksekliği - UstCubuk */
     z-index: 1000;
     overflow-y: auto;
+    background: white;
   }
+  
   .mobil-menu-btn {
     display: block;
+  }
+  
+  /* Sidebar açık olduğunda overlay ekle */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+  }
+  
+  .sidebar-overlay.acik {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .kategori-sidebar {
+    top: 56px; /* Küçük mobil için UstCubuk'un height */
+    height: calc(100vh - 56px);
+  }
+  
+  .page-wrapper {
+    padding-top: 66px; /* Küçük mobil için UstCubuk'un height + ekstra boşluk */
   }
 }
 
@@ -131,8 +175,37 @@ body {
   border-radius: 12px;
   padding: 2rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  /* Önemli: Main container'ın kategorilere göre grid pozisyonu korunmalı */
+  grid-column: 2; /* Grid'in ikinci sütununda kalacak */
+  /* Mobil cihazlar için alt kenar boşluğu */
+  margin-bottom: 1rem;
+  min-width: 0; /* İçeriğin taşmasını önlemek için */
 }
 
+/* Ekran boyutları için medya sorguları */
+@media (max-width: 1400px) {
+  .ilan-listesi.grid {
+    grid-template-columns: repeat(3, 1fr); /* Orta boy ekranlarda 3 ilan */
+  }
+}
+
+@media (max-width: 1100px) {
+  .ilan-listesi.grid {
+    grid-template-columns: repeat(2, 1fr); /* Daha küçük ekranlarda 2 ilan */
+  }
+}
+
+@media (max-width: 768px) {
+  .main-container {
+    grid-column: 1; /* Mobilde tek sütun olacak */
+  }
+  
+  .ilan-listesi.grid {
+    grid-template-columns: 1fr; /* Mobil ekranlarda tek sütun */
+  }
+}
+
+/* Geri kalan stiller aynı kalabilir, değişiklik gerekmiyor */
 .header {
   text-align: center;
   margin-bottom: 2rem;
@@ -198,10 +271,10 @@ body {
   color: white;
 }
 
-/* İlan Listesi */
+/* İlan Listesi - Her satırda 4 ilan olacak şekilde değiştirildi */
 .ilan-listesi.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(4, 1fr); /* Her satırda 4 ilan */
   gap: 1.5rem;
 }
 
@@ -211,6 +284,104 @@ body {
   gap: 1rem;
 }
 
+/* Liste Görünümü için Yeni Stiller */
+.ilan-listesi.list .ilan-karti-yatay {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  height: auto;
+}
+
+.ilan-listesi.list .ilan-resim-container {
+  width: 200px;
+  height: 160px;
+  min-width: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ilan-listesi.list .ilan-bilgileri {
+  flex: 1;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 0.75rem;
+}
+
+.ilan-listesi.list .ilan-baslik-fiyat {
+  grid-column: 1 / span 1;
+  grid-row: 1;
+}
+
+.ilan-listesi.list .ilan-fiyat {
+  font-size: 1.25rem;
+}
+
+.ilan-listesi.list .ilan-detaylar {
+  grid-column: 1 / span 1;
+  grid-row: 2;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.ilan-listesi.list .ilan-kategori {
+  position: static;
+  grid-column: 2;
+  grid-row: 1;
+  background: #f1f2f6;
+  color: #2d3436;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  align-self: start;
+  justify-self: end;
+}
+
+.ilan-listesi.list .ilan-aciklama {
+  grid-column: 1 / span 2;
+  grid-row: 3;
+  -webkit-line-clamp: 3;
+  margin: 0;
+}
+
+.ilan-listesi.list .ilan-alt-bilgiler {
+  grid-column: 1 / span 2;
+  grid-row: 4;
+  margin-top: 0.5rem;
+}
+
+/* Mobil için Liste Görünümü Ayarları */
+@media (max-width: 768px) {
+  .ilan-listesi.list .ilan-karti-yatay {
+    flex-direction: column;
+  }
+  
+  .ilan-listesi.list .ilan-resim-container {
+    width: 100%;
+    height: 200px;
+  }
+  
+  .ilan-listesi.list .ilan-kategori {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+  }
+  
+  .ilan-listesi.list .ilan-detaylar {
+    grid-row: 3;
+  }
+  
+  .ilan-listesi.list .ilan-aciklama {
+    grid-row: 4;
+  }
+  
+  .ilan-listesi.list .ilan-alt-bilgiler {
+    grid-row: 5;
+  }
+}
+
 /* İlan Kartı */
 .ilan-karti-yatay {
   position: relative;
@@ -218,14 +389,33 @@ body {
   border: 1px solid #eaecef;
   border-radius: 12px;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   cursor: pointer;
+}
+
+.ilan-karti-yatay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .ilan-karti-yatay:hover {
   transform: translateY(-6px);
   box-shadow: 0 12px 32px rgba(0, 95, 163, 0.12);
   border-color: transparent;
+}
+
+.ilan-karti-yatay:hover::before {
+  border-color: #005fa3;
+  animation: pulseBorder 1.5s infinite;
 }
 
 .ilan-resim-container {
@@ -247,13 +437,13 @@ body {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(0,95,163,0.1);
-  color: #005fa3;
-  padding: 0.5rem 1rem;
+  background: rgba(2, 83, 141, 0.5);
+  color: #ffffff;
+  padding: 0.5rem 0.7rem;
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 600;
-  border: 1px solid rgba(0,95,163,0.2);
+  border: 1px solid rgba(0, 95, 163, 0.205);
 }
 
 .ilan-bilgileri {
@@ -393,11 +583,12 @@ body {
 .sayfa-yon-butonu,
 .sayfa-numarasi {
   background: none;
-  border: 2px solid #eaecef;
+  border: 2px solid #0644a0;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
+  color:#005fa3
 }
 
 .sayfa-yon-butonu:hover:not(:disabled),
@@ -451,3 +642,4 @@ body {
 .no-results button:hover {
   background: #004a82;
 }
+
