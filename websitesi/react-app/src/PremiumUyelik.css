@@ -1,156 +1,333 @@
-.uyelik-container {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 20px;
-  font-family: 'Arial', sans-serif;
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --secondary: #60a5fa;
+  --success: #22c55e;
+  --error: #ef4444;
+  --background: #f8fafc;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(226, 232, 240, 0.5);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --radius: 1.5rem;
+  --transition: 0.4s;
+  --blob-color-1: rgba(37, 99, 235, 0.1);
+  --blob-color-2: rgba(60, 179, 113, 0.1);
+  --blob-color-3: rgba(255, 192, 203, 0.1);
 }
 
+/* Reset */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: linear-gradient(135deg, var(--background) 0%, #e2e8f0 100%);
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-primary);
+  line-height: 1.6;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Retain existing styles */
+body::before {
+  background-image:
+    radial-gradient(var(--primary) 1px, transparent 1px),
+    radial-gradient(var(--primary) 1px, var(--background) 1px);
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
+  opacity: 0.1;
+  z-index: -1;
+}
+
+.uyelik-container {
+  max-width: 1280px;
+  margin: 3rem auto;
+  padding: 0 1rem;
+  position: relative;
+}
+
+/* Header */
 .header {
   text-align: center;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius);
+  padding: 3rem 2rem;
   margin-bottom: 3rem;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 12px 24px -6px var(--shadow-color);
+  overflow: hidden;
+  position: relative;
 }
 
 .header h1 {
-  color: #2c3e50;
-  font-size: 2.5rem;
+  font-size: 2.75rem;
+  font-weight: 800;
   margin-bottom: 1rem;
+  animation: fadeInDown 0.8s ease;
 }
-
 .header p {
-  color: #7f8c8d;
-  font-size: 1.1rem;
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  animation: fadeIn 0.8s ease 0.2s backwards;
 }
 
+/* Plan Grid */
 .plan-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 2rem;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
-
 .plan-card {
-  background: #ffffff;
-  border-radius: 15px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius);
   padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  transition: transform var(--transition), box-shadow var(--transition);
   cursor: pointer;
-  border: 2px solid transparent;
+  overflow: hidden;
+  position: relative;
 }
-
-.plan-card.active {
-  border-color: #3498db;
-  transform: translateY(-5px);
-  background: #f8f9ff;
+.plan-card::after {
+  display: none; /* Mavi efektin tamamen kaldırılması */
 }
-
+.plan-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+.plan-card:hover::after {
+  opacity: 1;
+}
 .plan-card h3 {
-  color: #2c3e50;
-  margin-bottom: 1rem;
   font-size: 1.5rem;
-}
-
-.price {
-  color: #3498db;
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 1.5rem 0;
-}
-
-.benefits-list {
-  list-style: none;
-  padding: 0;
-}
-
-.benefits-list li {
-  margin: 0.8rem 0;
-  color: #34495e;
-  display: flex;
-  align-items: center;
-}
-
-.check-icon {
-  color: #27ae60;
-  margin-right: 0.5rem;
-  font-weight: bold;
-}
-
-.payment-form {
-  background: #ffffff;
-  padding: 2rem;
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
   margin-bottom: 0.5rem;
-  color: #2c3e50;
-  font-weight: 500;
+}
+.plan-card .price {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+.benefits-list { list-style: none; margin-bottom: 1rem; }
+.benefits-list li { display: flex; align-items: center; margin-bottom: 0.5rem; }
+.check-icon { color: var(--success); margin-right: 0.5rem; }
+
+/* Selected Plan Wrapper */
+.selected-plan-banner {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+  transition: transform var(--transition);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.selected-plan-banner:hover { transform: translateY(-4px); }
+.selected-plan-banner .plan-info { font-size: 1.25rem; font-weight: 600; color: var(--primary); }
+.selected-plan-banner button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+.selected-plan-banner button:hover {
+  background: var(--primary-hover);
+  transform: scale(1.05);
 }
 
-.form-group input {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #ecf0f1;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
+/* Payment Form */
+.payment-form {
+  max-width: 640px;
+  margin: 0 auto 3rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  padding: 2.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 12px 28px -8px rgba(0,0,0,0.08);
+  animation: fadeInUp 0.8s ease;
 }
-
-.form-group input:focus {
-  outline: none;
-  border-color: #3498db;
-}
-
-.form-group input.error {
-  border-color: #e74c3c;
-}
-
-.error-message {
-  color: #e74c3c;
-  font-size: 0.9rem;
-  margin-top: 0.3rem;
-  display: block;
-}
-
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 96%;
+  overflow: hidden;
 }
+.form-group {
+  position: relative;
+  min-width: 0; /* Önemli: Flex/grid içinde kaymayı önler */
+  flex-shrink: 1;
+  overflow: hidden;
+  grid-column: span 1;
+}
+
+.form-group label { 
+  font-size: 0.875rem; 
+  margin-bottom: 0.5rem; 
+  color: var(--text-secondary); 
+  display: block; 
+}
+.form-group input {
+  width: 100%; 
+  max-width: 92%;
+  padding: 0.75rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 0.75rem;
+  background: rgba(255,255,255,0.8);
+  transition: border-color 0.3s, box-shadow 0.3s;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+.form-group input {
+  width: 100%;
+  min-width: 150px; /* Minimum genişlik */
+  padding: 0.75rem;
+  box-sizing: border-box; /* Padding genişliği etkilemesin */
+}
+.error { border-color: var(--error) !important; }
+.error-message { color: var(--error); font-size: 0.8rem; margin-top: 0.25rem; }
 
 .submit-btn {
-  background: #3498db;
-  color: white;
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
+  width: 100%; padding: 0.85rem;
+  background: linear-gradient(45deg,var(--primary),var(--secondary));
+  color: #fff; font-size: 1rem; font-weight: 600;
+  border: none; border-radius: 0.75rem;
   cursor: pointer;
-  width: 100%;
-  transition: background 0.3s ease;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(37,99,235,0.2); }
+.submit-btn:disabled { background: #a0aec0; cursor: not-allowed; }
+
+/* Karşılaştırma Bölümü CSS */
+.comparison-section {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-top: 3rem;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.05);
+  backdrop-filter: blur(12px);
+  animation: fadeInUp 0.8s ease;
 }
 
-.submit-btn:hover {
-  background: #2980b9;
+.comparison-section h2 {
+  text-align: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: var(--primary);
 }
 
-.submit-btn.loading {
-  background: #7f8c8d;
-  cursor: not-allowed;
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  border-top: 1px solid var(--glass-border);
+  border-left: 1px solid var(--glass-border);
+  overflow-x: auto;
 }
 
+.comparison-row {
+  display: contents;
+}
+
+.comparison-row > div {
+  padding: 1rem;
+  border-right: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.comparison-row.header > div {
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+.comparison-row .feature {
+  font-weight: 600;
+  text-align: left;
+  padding-left: 1rem;
+}
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .header h1 { font-size: 2.5rem; }
+  .plan-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+  .form-row { grid-template-columns: 1fr 1fr; gap: 1rem; }
+}
 @media (max-width: 768px) {
-  .form-row {
-    grid-template-columns: 1fr;
+  .header { 
+    padding: 2.5rem 1.5rem; 
+    margin-bottom: 2.5rem; 
+  }
+  .plan-grid { 
+    gap: 1rem; 
+  }
+  .selected-plan-banner { 
+    justify-content: center; 
+    text-align: center; 
+  }
+  .payment-form { 
+    padding: 2rem; 
+  }
+   .form-row {
+    grid-template-columns: 1fr; /* Mobilde tek sütun */
   }
   
-  .plan-grid {
+  .form-group input {
+    min-width: 100%; /* Mobilde tam genişlik */
+  }
+
+  .comparison-grid {
     grid-template-columns: 1fr;
+  }
+  .comparison-row > div {
+    text-align: left;
+  }
+}
+@media (max-width: 480px) {
+  .header {
+    padding: 2rem 1rem; 
+  }
+  .plan-card { 
+    padding: 1.5rem;
+  }
+  .selected-plan-banner { 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 0.5rem;
+  }
+  .form-row { 
+    grid-template-columns: 1fr;
+  }
+  .submit-btn { 
+    padding: 0.75rem; 
   }
 }

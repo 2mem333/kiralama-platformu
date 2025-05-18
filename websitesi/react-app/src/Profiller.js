@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import UstCubuk2 from './UstCubukProfil';
 import { useNavigate } from 'react-router-dom';
-import './ProfilSayfa.css';
+import './Profiller.css';
 
 //-----------------------------------JAVASCRIPT KODU BASLANGIC------------------------------------------------
 function Profiller() {
@@ -24,6 +24,7 @@ const [ilanBaslik, setIlanBaslik] = useState('');
 const [ilanFiyat, setIlanFiyat] = useState('');
 const navigate = useNavigate();
 const [previewUrl, setPreviewUrl] = useState(null);
+const [activeTab, setActiveTab] = useState('profil');
 
 const [_TOKENKULLANICIID, fTokenKullaniciId] = useState(null); //sisteme giris yapmis tokende yazan kullanici id
 
@@ -302,6 +303,7 @@ if (token) {
       isim: _KULLANICI.isim,
       email: _KULLANICI.email,
       telefon: _KULLANICI.telefon,
+      adres: _KULLANICI.adres,
       hakkimda: _KULLANICI.hakkimda,
       mevcutSifre: '',
       yeniSifre: '',
@@ -324,9 +326,11 @@ if (token) {
 
     const reader = new FileReader();
     reader.onload = () => {
+      // Hem önizleme hem de form state'i güncelle
+      setPreviewUrl(reader.result);
       setAyarlarFormu(prev => ({
         ...prev,
-        avatar: reader.result // Yeni avatarı base64 olarak kaydet
+        avatar: reader.result
       }));
     };
     reader.readAsDataURL(file);
@@ -335,18 +339,29 @@ if (token) {
   // Form gönderimi güncellendi
   const handleFormSubmit = (e) => {
     e.preventDefault();
+
+    // Profil resmini güncelle
+    if(previewUrl) {
+      fProfil(prev => ({
+        ...prev,
+        avatar: previewUrl
+      }));
+      setPreviewUrl(null);
+    }
+
     let changes = {
       bilgilerDegisti: false,
       sifreDegisti: false
     };
 
     // Check for profile info changes
-    if (ayarlarFormu.isim !== _KULLANICI.isim || 
-        ayarlarFormu.email !== _KULLANICI.email || 
-        ayarlarFormu.telefon !== _KULLANICI.telefon || 
-        ayarlarFormu.hakkimda !== _KULLANICI.hakkimda) {
-      changes.bilgilerDegisti = true;
-    }
+    if (ayarlarFormu.isim !== _KULLANICI.ad || 
+      ayarlarFormu.email !== _KULLANICI.email || 
+      ayarlarFormu.telefon !== _KULLANICI.telefonNumarasi || 
+      ayarlarFormu.adres !== _KULLANICI.adres || // Yeni eklenen kontrol
+      ayarlarFormu.hakkimda !== _PROFIL.hakkinda) {
+    changes.bilgilerDegisti = true;
+  }
 
     // Check for password changes
     if (ayarlarFormu.yeniSifre || ayarlarFormu.mevcutSifre) {
@@ -397,9 +412,14 @@ if (token) {
   
     // Profil fotoğrafını kaldırma işlemi
     const handleRemoveAvatar = () => {
+      setPreviewUrl(null);
       setAyarlarFormu(prev => ({
         ...prev,
-        avatar: '/varsayilan-avatar.jpg' // Varsayılan avatar yolu
+        avatar: ''
+      }));
+      fProfil(prev => ({
+        ...prev,
+        avatar: '/varsayilan-avatar.jpg'
       }));
     };
       
@@ -504,7 +524,6 @@ return (
         <button onClick={() => setError(null)}>×</button>
       </div>
     )}
-  <UstCubuk2/>
  <div className="profil-container">
       {/* Profil Başlık Alanı */}
       {/* Ana sayfaya dön butonu */}
@@ -516,7 +535,7 @@ return (
       </button>
       <div className="profil-header">
         <img 
-          src={(_PROFIL.avatar)}  
+          src={_PROFIL.avatar.length < 5 ? placeholderImage : _PROFIL.avatar}  
           className="profil-avatar" 
           alt="Profil Avatar"
         />
@@ -626,16 +645,20 @@ return (
         
         {/* İlanlar Sekmesi */}
         {aktifSekme === 'ilanlar' && (
-          <div className="ilanlar-sekme">
-            <div className="ilanlar-baslik-container">
-              <h2 className="hakkimda-baslik">İlanlarım</h2>
+        <div className="ilanlar-sekme">
+          <div className="ilanlar-baslik-container">
+            <h2 className="hakkimda-baslik">
+              {_TOKENKULLANICIID === parseInt(kullaniciid) ? "İlanlarım" : "İlanlar"}
+            </h2>
+            {_TOKENKULLANICIID === parseInt(kullaniciid) && (
               <button 
                 className="daha-fazla-btn"
                 onClick={() => navigate(`/ilan-yonetimi/${kullaniciid}`)}
               >
                 İlanları Yönet
               </button>
-            </div>
+            )}
+          </div>
             <div className="profil-ilanlar">
               {_ILANLAR.map(ilan => (
                 <div key={ilan.ilanId} className="profil-ilan-karti">
@@ -677,7 +700,7 @@ return (
                   ) : (
                     <>
                       <img
-                        className="profil-ilan-resim"         // ← burayı ekliyoruz
+                        className="profil-ilan-resim"
                         src={ilan.ilanResim[0]}
                         alt={ilan.ilanAdi}
                         onError={e => { e.target.onerror = null; e.target.src = placeholderImage; }}
@@ -771,12 +794,32 @@ return (
         
         {/* Ayarlar Sekmesi */}
         {aktifSekme === 'ayarlar' && _TOKENKULLANICIID === parseInt(kullaniciid) && (
-          <div className="ayarlar-sekme">
-            <h2 className="hakkimda-baslik">Profil Ayarları</h2>
-            <form className="ayarlar-formu" onSubmit={handleFormSubmit}>
+        <div className="ayarlar-sekme">
+          <h2 className="hakkimda-baslik">Profil Ayarları</h2>
+          
+          {/* Kaydırılabilir Tablar */}
+          <div className="ayarlar-tabs">
+            <button 
+              className={`tab-btn ${activeTab === 'profil' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profil')}
+            >
+              Profil Bilgileri
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'sifre' ? 'active' : ''}`}
+              onClick={() => setActiveTab('sifre')}
+            >
+              Şifre Değiştir
+            </button>
+          </div>
+
+          <form className="ayarlar-formu" onSubmit={handleFormSubmit}>
+            
+            {/* Profil Bilgileri Alanı */}
+            <div className={`form-section ${activeTab === 'profil' ? 'active' : ''}`}>
               <div className="avatar-yukle">
                 <img 
-                  src={getImageUrl(_PROFIL.avatar)} 
+                  src={previewUrl || getImageUrl(_PROFIL.avatar)} 
                   alt="Profil Önizleme" 
                   className="avatar-onizleme" 
                 />
@@ -794,28 +837,37 @@ return (
                 >
                   Fotoğraf Seç
                 </button>
-                
-                {/* Profil fotoğrafını kaldırma butonu */}
                 <button 
                   type="button" 
                   className="avatar-kaldir-btn"
                   onClick={handleRemoveAvatar}
                 >
-                  Profil Fotoğrafını Kaldır
+                  Fotoğrafı Kaldır
                 </button>
               </div>
-              
+
               <div className="form-grup">
-                <label className="form-etiket">Ad Soyad</label>
+                <label className="form-etiket">Ad</label>
                 <input
                   type="text"
                   className="form-input"
                   name="isim"
-                  value={_KULLANICI.ad} 
+                  value={_KULLANICI.ad}
                   onChange={handleFormChange}
                 />
               </div>
-              
+
+           <div className="form-grup">
+                <label className="form-etiket">Soyad</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  name="soyad"
+                  value={_KULLANICI.soyad}
+                  onChange={handleFormChange}
+                />
+              </div>
+
               <div className="form-grup">
                 <label className="form-etiket">Email</label>
                 <input
@@ -826,7 +878,7 @@ return (
                   onChange={handleFormChange}
                 />
               </div>
-              
+
               <div className="form-grup">
                 <label className="form-etiket">Telefon</label>
                 <input
@@ -837,88 +889,99 @@ return (
                   onChange={handleFormChange}
                 />
               </div>
-              
+
+              {/* Yeni Eklenen Adres Alanı */}
+              <div className="form-grup">
+                <label className="form-etiket">Adres</label>
+                <textarea
+                  className="form-input"
+                  name="adres"
+                  value={_KULLANICI.adres}
+                  onChange={handleFormChange}
+                  rows="3"
+                />
+              </div>
+
               <div className="form-grup">
                 <label className="form-etiket">Hakkımda</label>
                 <textarea
                   className="form-input form-textarea"
                   name="hakkimda"
-                  value={_PROFIL.hakkinda}
+                  value={_PROFIL.hakkimda}
                   onChange={handleFormChange}
                 />
-              </div>
-              <h3 className="sifre-degistir-baslik">Şifre Değiştir</h3>
-            
-            {/* Mevcut Şifre Alanı */}
-            <div className="form-grup">
-              <label className="form-etiket">Mevcut Şifre</label>
-              <div className="sifre-input-wrapper">
-                <input
-                  type={sifreGoster.mevcutSifre ? 'text' : 'password'}
-                  className="form-input"
-                  name="mevcutSifre"
-                  value={ayarlarFormu.mevcutSifre}
-                  onChange={handleFormChange}
-                />
-                <button
-                  type="button"
-                  className="sifre-goster-btn"
-                  onClick={() => toggleSifreGoster('mevcutSifre')}
-                >
-                  {sifreGoster.mevcutSifre ? 'Gizle' : 'Göster'}
-                </button>
               </div>
             </div>
 
-            {/* Yeni Şifre Alanı */}
-            <div className="form-grup">
-              <label className="form-etiket">Yeni Şifre</label>
-              <div className="sifre-input-wrapper">
-                <input
-                  type={sifreGoster.yeniSifre ? 'text' : 'password'}
-                  className="form-input"
-                  name="yeniSifre"
-                  value={ayarlarFormu.yeniSifre}
-                  onChange={handleFormChange}
-                />
-                <button
-                  type="button"
-                  className="sifre-goster-btn"
-                  onClick={() => toggleSifreGoster('yeniSifre')}
-                >
-                  {sifreGoster.yeniSifre ? 'Gizle' : 'Göster'}
-                </button>
+            {/* Şifre Değiştirme Alanı */}
+            <div className={`form-section ${activeTab === 'sifre' ? 'active' : ''}`}>
+              <div className="form-grup">
+                <label className="form-etiket">Mevcut Şifre</label>
+                <div className="sifre-input-wrapper">
+                  <input
+                    type={sifreGoster.mevcutSifre ? 'text' : 'password'}
+                    className="form-input"
+                    name="mevcutSifre"
+                    value={ayarlarFormu.mevcutSifre}
+                    onChange={handleFormChange}
+                  />
+                  <button
+                    type="button"
+                    className="sifre-goster-btn"
+                    onClick={() => toggleSifreGoster('mevcutSifre')}
+                  >
+                    {sifreGoster.mevcutSifre ? 'Gizle' : 'Göster'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-grup">
+                <label className="form-etiket">Yeni Şifre</label>
+                <div className="sifre-input-wrapper">
+                  <input
+                    type={sifreGoster.yeniSifre ? 'text' : 'password'}
+                    className="form-input"
+                    name="yeniSifre"
+                    value={ayarlarFormu.yeniSifre}
+                    onChange={handleFormChange}
+                  />
+                  <button
+                    type="button"
+                    className="sifre-goster-btn"
+                    onClick={() => toggleSifreGoster('yeniSifre')}
+                  >
+                    {sifreGoster.yeniSifre ? 'Gizle' : 'Göster'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-grup">
+                <label className="form-etiket">Yeni Şifre Tekrar</label>
+                <div className="sifre-input-wrapper">
+                  <input
+                    type={sifreGoster.yeniSifreTekrar ? 'text' : 'password'}
+                    className="form-input"
+                    name="yeniSifreTekrar"
+                    value={ayarlarFormu.yeniSifreTekrar}
+                    onChange={handleFormChange}
+                  />
+                  <button
+                    type="button"
+                    className="sifre-goster-btn"
+                    onClick={() => toggleSifreGoster('yeniSifreTekrar')}
+                  >
+                    {sifreGoster.yeniSifreTekrar ? 'Gizle' : 'Göster'}
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Yeni Şifre Tekrar Alanı */}
-            <div className="form-grup">
-              <label className="form-etiket">Yeni Şifre Tekrar</label>
-              <div className="sifre-input-wrapper">
-                <input
-                  type={sifreGoster.yeniSifreTekrar ? 'text' : 'password'}
-                  className="form-input"
-                  name="yeniSifreTekrar"
-                  value={ayarlarFormu.yeniSifreTekrar}
-                  onChange={handleFormChange}
-                />
-                <button
-                  type="button"
-                  className="sifre-goster-btn"
-                  onClick={() => toggleSifreGoster('yeniSifreTekrar')}
-                >
-                  {sifreGoster.yeniSifreTekrar ? 'Gizle' : 'Göster'}
-                </button>
-              </div>
-            </div>
-
-
-              <button type="submit" className="form-buton">
-                Bilgileri Güncelle
-              </button>
-            </form>
-          </div>
-        )}
+            <button type="submit" className="form-buton">
+              Bilgileri Güncelle
+            </button>
+          </form>
+        </div>
+      )}
       </div>
       {/* Alt Bilgi */}
       <footer className="profile__footer">

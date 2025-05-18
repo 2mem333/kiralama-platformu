@@ -42,19 +42,20 @@
 .sag-menu-ogeleri {
   display: flex;
   align-items: center;
-  gap: 15px; /* İkonlar arası boşluk */
+  gap: 20px; /* İkonlar arası boşluk artırıldı */
   order: 3; /* Arama çubuğundan sonra gelsin */
-  margin-left: auto;
+  margin-left: auto; /* Tüm boşluğu doldurup en sağa iter */
 }
 
-/* Bildirim ve profil sıralaması */
+/* Bildirim ve profil sıralaması - profil en sağda olacak */
 .bildirim-container {
-  position: static; /* Değiştirildi */
+  position: relative; /* Fixed değil, relative pozisyon */
   order: 1; /* Önce bildirim */
 }
 
 .profil-container {
-  order: 2; /* Sonra profil */
+  position: relative; /* Dropdown için relative pozisyon */
+  order: 2; /* Sonra profil - en sağda olacak */
   margin-left: 15px;
 }
 
@@ -119,12 +120,6 @@
   font-weight: 400;
 }
 
-.sag-menu-ogeleri {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
 /* Olası sağ menü butonları için */
 .sag-menu-buton {
   background: none;
@@ -176,13 +171,6 @@
   font-size: 0.8rem;
 }
 
-.sag-menu-ogeleri {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end; /* Tüm öğeleri sağa hizalar */
-  gap: 15px;
-}
-
 .profil-ikon {
   cursor: pointer;
   text-decoration: none;
@@ -191,43 +179,49 @@
   align-items: center;
 }
 
-.profil-ikon-ust {
-  font-size: 24px;
-  transition: transform 0.2s ease;
+/* Profil resmi konteyneri ve stili - beyaz alan kaldırıldı ve daha belirgin hale getirildi */
+.profil-resim-container {
+  width: 42px; /* Boyut artırıldı */
+  height: 42px; /* Boyut artırıldı */
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #0078d7; /* Kenar rengi korundu ama daha belirgin */
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); /* Gölge artırıldı */
+  transition: all 0.3s ease;
 }
 
-.profil-ikon-ust:hover {
-  transform: scale(1.1);
+.profil-resim-container:hover {
+  transform: scale(1.05);
+  border-color: #005fa3;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25); /* Hover gölgesi artırıldı */
+}
+
+.profil-resim {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* Bildirim İkonu Stilleri */
-.bildirim-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-}
-
 .bildirim-icon {
   position: relative;
   cursor: pointer;
   font-size: 1.5rem;
   color: #333;
   padding: 10px;
-  background: #f8f9fa;
+  background: transparent; /* Arkaplan kaldırıldı */
   border-radius: 50%;
   width: 40px;
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
 }
 
 .bildirim-icon:hover {
-  background: #e9ecef;
-  transform: scale(1.05);
+  transform: scale(1.1);
+  color: #0078d7; /* Hover rengi değiştirildi */
 }
 
 .bildirim-sayaci {
@@ -242,6 +236,7 @@
   font-weight: bold;
   min-width: 20px;
   text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15); /* Gölge eklendi */
 }
 
 /* Bildirim Dropdown */
@@ -256,6 +251,7 @@
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
   border: 1px solid #dee2e6;
+  z-index: 101;
 }
 
 .bildirim-header {
@@ -324,6 +320,26 @@
   padding: 8px;
 }
 
+.tumunu-okundu-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s ease;
+}
+
+.tumunu-okundu-btn:hover {
+  background: #5a6268;
+}
+
+.tumunu-okundu-btn:disabled {
+  background: #adb5bd;
+  cursor: not-allowed;
+}
+
 .teklif-actions {
   margin-top: 10px;
   display: flex;
@@ -335,6 +351,13 @@
   color: white;
   padding: 5px 10px;
   border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.onayla-btn:hover {
+  background: #218838;
 }
 
 .reddet-btn {
@@ -342,12 +365,21 @@
   color: white;
   padding: 5px 10px;
   border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.reddet-btn:hover {
+  background: #c82333;
 }
 
 .teklif-durum {
   font-size: 0.9em;
   padding: 3px 8px;
   border-radius: 12px;
+  display: inline-block;
+  margin-top: 5px;
 }
 
 .teklif-durum.onaylandı {
@@ -360,27 +392,57 @@
   color: #721c24;
 }
 
-.teklif-actions {
-  display: flex; /* Butonları yan yana gösterir */
-  gap: 10px; /* Butonlar arası boşluk */
-  margin-top: 10px;
+/* Profil Dropdown Menü Stili */
+.profil-dropdown {
+  position: absolute;
+  right: 0;
+  top: 55px; /* Dropdown konumu hafifçe aşağı alındı */
+  background: white;
+  width: 240px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  border: 1px solid #dee2e6;
+  z-index: 101;
+  overflow: hidden;
 }
 
-.onayla-btn, .reddet-btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+.profil-menu-listesi {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.onayla-btn {
-  background: #4CAF50; /* Yeşil */
-  color: white;
+.profil-menu-item {
+  display: block;
+  padding: 0;
+  margin: 0;
 }
 
-.reddet-btn {
-  background: #f44336; /* Kırmızı */
-  color: white;
+.profil-menu-item a {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #212529;
+  transition: background 0.2s ease;
+}
+
+.profil-menu-item a:hover {
+  background-color: #f8f9fa;
+}
+
+.profil-menu-ikon {
+  margin-right: 12px;
+  font-size: 1.2rem;
+  width: 24px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.profil-menu-ayrac {
+  height: 1px;
+  background-color: #dee2e6;
+  margin: 6px 0;
 }
 
 /* Mobil cihazlar için küçük ayarlamalar */
@@ -434,26 +496,20 @@
 
   /* Sağ menüyü düzenle */
   .sag-menu-ogeleri {
-    gap: 8px; /* İkonlar arası boşluğu azalt */
-    padding-right: 10px; /* Sağ kenardan boşluk ekle */
+    gap: 12px; /* İkonlar arası boşluğu artırdık */
+    margin-left: auto; /* Sağa doğru ittik */
   }
 
-  /* Bildirim konteynerini düzelt */
-  .bildirim-container {
-    position: static; /* Fixed pozisyonu kaldır */
-  }
-
-  /* Profil ikonu boyutunu küçült */
-  .profil-ikon {
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
+  /* Profil resmi konteyner boyutu güncellendi */
+  .profil-resim-container {
+    width: 36px;
+    height: 36px;
   }
 
   /* Bildirim ikonu boyutunu küçült */
   .bildirim-icon {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
   }
 
   /* Ana konteynırın içeriğini sıkıştır */
@@ -461,34 +517,12 @@
     justify-content: space-between; /* Elemanları eşit dağıt */
     padding: 0 10px;
   }
-
-  .sag-menu-ogeleri {
-    gap: 8px; /* İkonlar arası boşluğu azalt */
-    padding-right: 10px; /* Sağ kenardan boşluk ekle */
-  }
-
-  /* Bildirim konteynerini düzelt */
-  .bildirim-container {
-    position: static; /* Fixed pozisyonu kaldır */
-  }
-
-  /* Profil ikonu boyutunu küçült */
-  .profil-ikon {
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
-  }
-
-  /* Bildirim ikonu boyutunu küçült */
-  .bildirim-icon {
-    width: 32px;
-    height: 32px;
-  }
-
-  /* Ana konteynırın içeriğini sıkıştır */
-  .ust-cubuk-icerik {
-    justify-content: space-between; /* Elemanları eşit dağıt */
-    padding: 0 10px;
+  
+  /* Dropdown menüleri için düzenleme */
+  .bildirim-dropdown,
+  .profil-dropdown {
+    width: 280px;
+    right: -10px;
   }
 }
 
@@ -500,8 +534,8 @@
   }
 
   .sag-menu-ogeleri {
-    gap: 5px;
-    padding-right: 5px;
+    gap: 8px; /* Küçük ekranlarda boşluğu azalt */
+    margin-left: auto; /* Sağa doğru it */
   }
 
   .site-logo a {
@@ -512,16 +546,6 @@
   .bildirim-sayaci {
     padding: 2px 6px; /* Bildirim sayacını küçült */
     font-size: 0.65rem;
-  }
-  
-  .site-logo a {
-    font-size: 1.1rem; /* Logo yazı boyutunu küçült */
-    padding-left: 2%;
-  }
-  
-  .sag-menu-ogeleri {
-    gap: 5px;
-    padding-right: 5px;
   }
   
   .sag-menu-buton {
@@ -529,12 +553,19 @@
     height: 36px;
   }
 
-  .bildirim-sayaci {
-    padding: 2px 6px; /* Bildirim sayacını küçült */
-    font-size: 0.65rem;
+  /* Profil resmi konteyner boyutu */
+  .profil-resim-container {
+    width: 34px;
+    height: 34px;
+    border-width: 1.5px; /* Kenarlık kalınlığını azalt */
+  }
+
+  /* Dropdown menüleri için düzenleme */
+  .bildirim-dropdown,
+  .profil-dropdown {
+    width: 260px;
+    max-width: calc(100vw - 20px);
+    right: -15px;
   }
 }
 
-.ust-cubuk {
-  background-image: url("C:\Users\Berk\kiralama-platformu\websitesi\react-app\public\ustcubuk2.png");
-}

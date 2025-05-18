@@ -8,6 +8,8 @@ import IlanArayuzu from './IlanArayuzu';
 import PremiumUyelik from './PremiumUyelik';
 import Profiller from './Profiller';
 import IlanYonetimi from './IlanYonetimi';
+import IlanGuncelleme from './ilanGuncelle';
+import SikcaSorulanSorular from './sikcaSorulanSorular';
 
 function App() {
    const [_MEVCUTKULLANICIID, fMevcutKullaniciId] = useState(null);
@@ -39,8 +41,10 @@ function App() {
           <Route path="/ilanolustur" element={<IlanOlusturma />} />
           <Route path="/ilanlar/:ilanid/:baslik" element={<IlanArayuzu />} />
           <Route path="/uyelik" element={<PremiumUyelik />} />
+          <Route path="/sss" element={<SikcaSorulanSorular />} />
           <Route path="/profiller/:kullaniciid" element={<Profiller />} />
           <Route path="/ilan-yonetimi/:kullaniciid" element={<IlanYonetimi />} />
+          <Route path="/ilanguncelle/:ilanId" element={<IlanGuncelleme/>}/>
         </Routes>
     </Router>
   );

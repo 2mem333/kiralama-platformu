@@ -114,7 +114,6 @@ function IlanYonetimi() {
 
   return (
     <>
-      <UstCubuk2 />
       <div className="profil-container">
         <div className="profil-header">
           <h1 className="profil-isim">İlan Yönetimi</h1>

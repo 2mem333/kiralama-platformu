@@ -261,11 +261,7 @@ if (token) {
 //-----------------------JSX BLOGU BASLANGIC--------------------------------------------------------------------------------------------------------
   return (
     <>
-        <div>
-      <h1>Giriş yapan kullanıcı ID: {_KULLANICIID}</h1>
-      <button onClick={cikisYap}>Çıkış Yap</button>
-    </div>
-      <UstCubuk _ARAMAMETNI={_ARAMAMETNI} onAramaChange={handleAramaChange} />
+      <UstCubuk _ARAMAMETNI={_ARAMAMETNI} onAramaChange={handleAramaChange} kullaniciId={_KULLANICIID}/>
       <div className="page-wrapper">
         <aside className={`kategori-sidebar ${_SIDEBARACIK ? 'acik' : ''}`}>
           <h2 className="sidebar-baslik">Kategoriler</h2>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams,useNavigate } from 'react-router-dom';
 import './ilanArayuzu.css';
 
 //---------------------------JAVASCRPIPT KODLARI BAŞLANGIÇ--------------------------------
@@ -12,18 +12,137 @@ function IlanArayuzu() {
   const [aktifSekme, sekmeAyarla] = useState('yorumlar');
   const [modalAcik, modalAcikAyarla] = useState(false);
   const [modalResimIndex, modalResimIndexAyarla] = useState(0);
-  
-  // Yorumlar için state
-  const [yorumlar, yorumlarAyarla] = useState([
-    {
-      id: 1,
-      kullaniciAdi: 'Ahmet K.',
-      tarih: '12.04.2025',
-      yorum: 'Çok memnun kaldım, tavsiye ederim.'
-    }
-  ]);
-  // Yeni yorum için state
   const [yeniYorum, yeniYorumAyarla] = useState('');
+
+  const [_KULLANICIID, fKullaniciId] = useState(null);
+
+  const navigate = useNavigate();
+  class IlanYorumlari {
+  constructor() {
+    this.sahipid = 0;
+    this.yorum = '';
+    this.ilanid = 0;
+    this.avatar = '';
+
+    this.ad = '';
+    this.soyad = '';
+  }
+
+  // Değer atamak için metot
+  degerAta(alan, deger) {
+    this[alan] = deger;
+    return this;
+  }
+
+  // Kopyalama metodu (değişiklikleri yeni bir nesneye uygulamak için)
+  kopyala() {
+    const temp = new IlanYorumlari();
+    Object.keys(this).forEach(anahtar => {
+      temp[anahtar] = this[anahtar];
+    });
+    return temp;
+  }
+
+}
+  const [_ILANYORUMLARI, fIlanYorumlari] = useState([]);
+  const [_PROFILBILGILERI, fProfilBilgileri] = useState([]);
+
+ const kullaniciadi_cek = async ({ kullaniciid }) => {
+  try {
+    const params = new URLSearchParams({ kullaniciid });
+    const res = await fetch(`http://localhost:5000/api/profiller?${params}`);
+    if (!res.ok) throw new Error('API yanıtı başarısız');
+
+    const [data] = await res.json(); // data artık ilk obje
+    return `${data.ad} ${data.soyad}`;
+
+  } catch (err) {
+    console.error(err);
+    return null; // hata durumunda null döndür
+  }
+};
+
+const avatarurl_cek = async ({ kullaniciid }) => {
+  try {
+    const params = new URLSearchParams({ kullaniciid });
+    const res = await fetch(`http://localhost:5000/api/profil?${params}`);
+    if (!res.ok) throw new Error('API yanıtı başarısız');
+
+    const [data] = await res.json(); // data artık ilk obje
+    return data.avatar; // doğrudan avatar'ı döndür
+
+  } catch (err) {
+    console.error(err);
+    return null; // hata durumunda null döndür
+  }
+};
+
+const yorum_ekle = async (e) => {
+  if(!_KULLANICIID)
+    navigate("/giris");
+try { //SERVER ILE HABERLESME
+      const yanit = await fetch('http://localhost:5000/api/ilanyorumlari', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sahipid: _KULLANICIID, yorum: yeniYorum, ilanid: ilanid }),
+      });
+      
+      if (yanit.status === 200) {
+     alert('yorum eklendi');
+      } else{
+     alert('hata');
+      }
+    } catch (hata) {
+   alert('hata');
+    }
+};
+
+  useEffect(() => {
+      const tokenKontrol = async() =>{
+const token = localStorage.getItem('token');
+if (token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    fKullaniciId(payload.kullaniciid);
+  } catch (error) {
+    console.error('Token parsing error:', error);
+    // Token bozuksa temizleyebilirsin
+    localStorage.removeItem('token');
+  }
+}
+    }; tokenKontrol();
+
+  const ilanyorumlarini_cek = async () => {
+    try {
+      const params = new URLSearchParams({ limit: '15', ilanid: ilanid });
+      const res = await fetch(`http://localhost:5000/api/ilanyorumlari?${params}`);
+      if (!res.ok) throw new Error('API yanıtı başarısız');
+
+      const dataArray = await res.json();
+
+      // Her bir öğe için avatarları paralel olarak al
+      const IlanYorumlariArray = await Promise.all(
+        dataArray.map(async item => {
+          const avatar = await avatarurl_cek({ kullaniciid: item.sahipid });
+          const ad = await kullaniciadi_cek({ kullaniciid: item.sahipid });
+          return new IlanYorumlari()
+            .degerAta('yorum', item.yorum)
+            .degerAta('sahipid', item.sahipid)
+            .degerAta('avatar', avatar)
+            .degerAta('ad', ad);
+        })
+      );
+
+      fIlanYorumlari(IlanYorumlariArray);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  ilanyorumlarini_cek();
+}, [ilanid]);
 
   // GELİŞMİŞ RESİM PARSİNG FONKSİYONU
   const resimleriAyikla = (resimDizgisi) => {
@@ -97,7 +216,7 @@ function IlanArayuzu() {
   useEffect(() => {
     const ilaniGetir = async () => {
       try {
-        yuklemeAyarla(true);
+  yuklemeAyarla(true);
         const yanit = await fetch(`http://localhost:5000/api/ilanlar?ilanid=${ilanid}`);
         
         if (!yanit.ok) throw new Error(`HTTP hata! durum kodu: ${yanit.status}`);
@@ -130,7 +249,7 @@ function IlanArayuzu() {
         hataAyarla(`Veri yüklenemedi: ${err.message}`);
         ilanAyarla(null);
       } finally {
-        yuklemeAyarla(false);
+  yuklemeAyarla(false);
       }
     };
     
@@ -193,12 +312,13 @@ const fiyatHesapla = (tip) => {
 
   // Yorum ekleme fonksiyonu
   const yorumEkle = (e) => {
+
     e.preventDefault();
     if (yeniYorum.trim() === '') {
       alert('Lütfen bir yorum yazınız!');
       return;
     }
-    
+    /*
     // Yeni yorumu ekle
     const yeniYorumObjesi = {
       id: yorumlar.length + 1,
@@ -209,11 +329,12 @@ const fiyatHesapla = (tip) => {
     
     yorumlarAyarla([...yorumlar, yeniYorumObjesi]);
     yeniYorumAyarla(''); // Yorum alanını temizle
-    
+    */
+
     // Gerçek uygulamada bu noktada API'a yorum gönderilir
-    console.log('Yeni yorum eklendi:', yeniYorumObjesi);
   };
 
+  
   if (yukleniyor) return <div className="yukleme">Yükleniyor...</div>;
   if (hata) return <div className="hata">{hata}</div>;
   if (!ilan) return <div className="hata">İlan bulunamadı.</div>;
@@ -374,11 +495,11 @@ const fiyatHesapla = (tip) => {
           
           {/* Yorumlar listesi */}
           <div className="comments">
-            {yorumlar.length > 0 ? (
-              yorumlar.map((yorum) => (
-                <div className="comment-item" key={`comment-${yorum.id}`}>
+            {_ILANYORUMLARI.length > 0 ? (
+              _ILANYORUMLARI.map((yorum) => (
+                <div className="comment-item" key={`comment-${yorum.sahipid}`}>
                   <div className="comment-header">
-                    <strong>{yorum.kullaniciAdi}</strong>
+                    <strong>{yorum.ad}</strong>
                     <span className="comment-date">{yorum.tarih}</span>
                   </div>
                   <div className="comment-text">
@@ -394,7 +515,7 @@ const fiyatHesapla = (tip) => {
           {/* Yorum form */}
           <div className="comment-form">
             <h4>Yorum Yap</h4>
-            <form onSubmit={yorumEkle}>
+            <form onSubmit={yorum_ekle}>
               <textarea 
                 value={yeniYorum}
                 onChange={(e) => yeniYorumAyarla(e.target.value)}
