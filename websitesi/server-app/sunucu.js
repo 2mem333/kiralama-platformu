@@ -65,6 +65,15 @@ const pool_pd = new Pool({
   client_encoding: 'UTF8'
 });
 
+const pool_ilanyorumlari = new Pool({
+  user: 'postgres', //postgre adı
+  host: 'localhost',
+  database: 'ilanyorumlari_db',
+  password: '1337', //postgre sifre
+  port: 5432,
+  client_encoding: 'UTF8'
+});
+
 const pool_profil = new Pool({
   user: 'postgres', //postgre adı
   host: 'localhost',
@@ -156,7 +165,7 @@ app.get('/api/profiller', async (req, res) => {
 
   try {
     const result = await pool.query(query, values);
-    //console.log(result.rows);
+    console.log(result.rows);
     res.json(result.rows);
   } catch (error) {
     console.error('Veri çekilirken hata oluştu:', error);
@@ -315,6 +324,65 @@ app.get('/api/profil', async (req, res) => {
   } catch (error) {
     console.error('Veri çekilirken hata oluştu:', error);
     res.status(500).json({ error: 'Veri çekilirken hata oluştu' });
+  }
+});
+
+app.get('/api/ilanyorumlari', async (req, res) => {
+  let { ilanid,limit } = req.query;
+  
+  let query = 'SELECT * FROM ilanyorumlari';
+  let values = [];
+  let conditions = [];
+
+  if (ilanid) {
+    conditions.push(`ilanid = $${values.length + 1}`);
+    values.push(ilanid);
+  }
+
+  // Eğer filtreleme yapıldıysa WHERE ekle
+  if (conditions.length > 0) {
+    query += ` WHERE ${conditions.join(' AND ')}`;
+  }
+
+ if (limit) {
+    query += ` LIMIT $${values.length + 1}`;
+    values.push(limit);  // Limit parametresini values array'ine ekliyoruz
+  }
+
+  try {
+
+    const result = await pool_ilanyorumlari.query(query, values);
+    res.json(result.rows);
+    console.log("İlan yorumlari: ");
+    console.log(result.rows);
+  } catch (error) {
+    console.error('Veri çekilirken hata oluştu:', error);
+    res.status(500).json({ error: 'Veri çekilirken hata oluştu' });
+  }
+});
+
+app.post('/api/ilanyorumlari', async (req, res) => {
+  const { sahipid,yorum,ilanid } = req.body;
+
+  try {
+    const result = await pool_ilanyorumlari.query(
+      'INSERT INTO ilanyorumlari (sahipid, yorum, ilanid) VALUES ($1, $2, $3)',
+      [sahipid,yorum,ilanid]
+    );
+    
+    // Ekleme başarılı olduysa, 200 döndür
+    res.status(200).json({ message: 'Kayıt başarıyla oluşturuldu' });
+  
+  } catch (error) {
+    console.error(error);
+  
+    // Eğer hata UNIQUE kısıtlaması ile ilgiliyse (email ya da telefon numarası çakışması)
+    if (error.code === '23505') { // 23505 PostgreSQL hata kodu, unique constraint ihlali
+      res.status(401).json({ message: 'Zaten yorum yapilmis' });
+    } else {
+      // Diğer sunucu hataları için
+      res.status(500).json({ message: 'Sunucu hatası!' });
+    }
   }
 });
 
