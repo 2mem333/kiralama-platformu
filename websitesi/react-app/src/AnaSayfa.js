@@ -56,7 +56,7 @@ if (token) {
       const ilanlari_cek = async () => {
         try {
           const params = new URLSearchParams();
-          params.append('limit', '15');
+          params.append('limit', '100');
           const url = `http://localhost:5000/api/ilanlar?${params.toString()}`;
           const response = await fetch(url, {
             headers: {
@@ -282,7 +282,7 @@ if (token) {
         <div className="main-container">
           <header className="header">
             <h1>İkinci El Eşya İlanları</h1>
-            <p>İhtiyacınız olan eşyaları bulun veya kullanmadıklarınızı satın</p>
+            <p>Atsan atılmaz, satsan satılmaz. En iyisi KİRALA!</p>
           </header>
 
           <button className="mobil-menu-btn" onClick={toggleSidebar}>
@@ -351,7 +351,7 @@ if (token) {
                         </div>
                       </div>
                     </div>
-                    <div className="ilan-kategori">🏷️ Kategori: {ilan.kategori}</div>
+                    
                     <p className="ilan-aciklama">{ilan.aciklama}</p>
                     <div className="ilan-alt-bilgiler">
                       <div className="ilan-favori">
@@ -422,11 +422,39 @@ if (token) {
             </div>
           )}
         </div>
-
+                                     
         
       </div>
+<footer className="site-footer">
+      <div className="footer-container">
+        <div className="footer-section">
+          <h3>Hakkımızda</h3>
+          <p>İkinci el eşya alım satım platformu olarak hizmet vermekteyiz.</p>
+        </div>
+        <div className="footer-section">
+          <h3>Hızlı Linkler</h3>
+          <ul>
+            <li><Link to="/">Ana Sayfa</Link></li>
+            <li><Link to="/ilan-ver">İlan Ver</Link></li>
+            <li><Link to="/sss">SSS</Link></li>
+            <li><Link to="/iletisim">İletişim</Link></li>
+          </ul>
+        </div>
+        <div className="footer-section">
+          <h3>İletişim</h3>
+          <p>Email: info@ikinciel.com</p>
+          <p>Telefon: 0 (123) 456 78 90</p>
+        </div>
+      </div>
+      <div className="footer-bottom">
+        <p>&copy; {new Date().getFullYear()} İkinci El Eşya Platformu. Tüm hakları saklıdır.</p>
+      </div>
+    </footer>
+      
     </>
+    
   );
 };
+
 //-----------------------JSX BLOGU BITIS------------------------------------------------------------------------------------------------------------
 export default AnaSayfa;

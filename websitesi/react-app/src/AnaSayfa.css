@@ -43,7 +43,7 @@ body {
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  position: fixed; /* Önemli değişiklik: fixed pozisyon eklendi */
+  position: sticky; /* Önemli değişiklik: fixed pozisyon eklendi */
   top: 90px; /* UstCubuk'un altına gelecek şekilde pozisyonlandı (80px + 10px) */
   left: calc((100% - 1680px) / 2 + 1rem); /* Sayfa merkezi hesabı - 1440px yerine 1680px */
   width: 260px; /* Genişlik sabit kalmalı */
@@ -430,7 +430,9 @@ body {
 .ilan-resmi {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background-color: #f8f9fa;
+  border-radius: 8px;
 }
 
 .ilan-kategori {
@@ -643,3 +645,135 @@ body {
   background: #004a82;
 }
 
+.site-footer {
+  background: #005fa3;
+  color: #f5f6fa;
+  padding: 3rem 1rem 0;
+  margin-top: 2rem;
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.footer-section {
+  margin-bottom: 2rem;
+}
+
+.footer-section h3 {
+  color: #fff;
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.footer-section h3::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 50px;
+  height: 2px;
+  background: #34464e;
+}
+
+.footer-section p {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+  color: #dfe6e9;
+}
+
+.footer-section ul {
+  list-style: none;
+}
+
+.footer-section ul li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-section a {
+  color: #dfe6e9;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-section a:hover {
+  color:  #1a1e1f;
+}
+
+.footer-bottom {
+  background: #074674;
+  padding: 1.5rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.footer-bottom p {
+  margin: 0;
+  color: #b2bec3;
+  font-size: 0.9rem;
+}
+
+/* Responsive ayarlar */
+@media (max-width: 768px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .footer-section {
+    text-align: center;
+  }
+  
+  .footer-section h3::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+/* Animasyonlar */
+@keyframes gradientBorder {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes pulseBorder {
+  0%, 100% {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+  }
+  50% {
+    border-color: #764ba2;
+    box-shadow: 0 0 0 8px rgba(118, 75, 162, 0.2);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ilan-karti-yatay {
+  animation: fadeInUp 0.6s ease-out;
+}.ilan-resmi {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
