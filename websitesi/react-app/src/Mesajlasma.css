@@ -1,0 +1,248 @@
+/* Mesajlar.css */
+.mesajlar-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.mesajlar-paneli {
+  display: flex;
+  flex: 1;
+  background: #f5f5f5;
+}
+
+.konusma-listesi {
+  width: 350px;
+  background: white;
+  border-right: 1px solid #e0e0e0;
+  overflow-y: auto;
+}
+
+.konusma-arama {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.konusma-arama input {
+  width: 100%;
+  padding: 8px 15px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.konusma-item {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.konusma-item.aktif {
+  background: #f8f9fa;
+}
+
+.konusma-item:hover {
+  background: #f8f9fa;
+}
+
+.konusma-kullanici {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.konusma-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.konusma-bilgi h4 {
+  margin: 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.konusma-ilan {
+  margin: 2px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.konusma-onizleme {
+  margin: 0;
+  font-size: 13px;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.konusma-detay {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.konusma-tarih {
+  font-size: 12px;
+  color: #999;
+}
+
+.okunmamis-badge {
+  background: #007bff;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.mesajlasma-alani {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mesajlasma-header {
+  padding: 15px;
+  background: white;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mesaj-ilan-bilgi {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.ilan-kucuk-resim {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.ilan-git-btn {
+  background: #007bff;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.mesajlar-listesi {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.mesaj-item {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 15px;
+  position: relative;
+}
+
+.mesaj-item.gonderici {
+  background: #007bff;
+  color: white;
+  align-self: flex-end;
+}
+
+.mesaj-item.alicı {
+  background: white;
+  border: 1px solid #eee;
+  align-self: flex-start;
+}
+
+.mesaj-icerik p {
+  margin: 0 0 5px 0;
+}
+
+.mesaj-tarih {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.mesaj-gonder-form {
+  padding: 15px;
+  background: white;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 10px;
+}
+
+.mesaj-gonder-form textarea {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  resize: none;
+  min-height: 40px;
+  max-height: 120px;
+}
+
+.mesaj-gonder-form button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.mesaj-gonder-form button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.konusma-secimi {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  color: #666;
+}
+
+.mesajlasma-alani.full-width {
+  width: 100%;
+}
+
+/* Mesajlaşma header'ı için */
+.mesajlasma-header {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+}
+
+.kullanici-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.mesaj-kullanici-bilgi div h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.mesaj-kullanici-bilgi div p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
