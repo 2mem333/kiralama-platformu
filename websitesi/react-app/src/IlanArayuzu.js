@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams,useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import './ilanArayuzu.css';
 
 //---------------------------JAVASCRPIPT KODLARI BAŞLANGIÇ--------------------------------
@@ -13,6 +13,14 @@ function IlanArayuzu() {
   const [modalAcik, modalAcikAyarla] = useState(false);
   const [modalResimIndex, modalResimIndexAyarla] = useState(0);
   const [yeniYorum, yeniYorumAyarla] = useState('');
+  const fiyatInputRef = useRef(null);
+
+  // Teklif modalı için state'ler
+  const [teklifModalAcik, teklifModalAcikAyarla] = useState(false);
+  const [baslangicTarihi, baslangicTarihiAyarla] = useState('');
+  const [bitisTarihi, bitisTarihiAyarla] = useState('');
+  const [teklifFiyati, teklifFiyatiAyarla] = useState('');
+  const [teklifAdim, teklifAdimAyarla] = useState(1); // 1: Tarih seçimi, 2: Fiyat teklifi
 
   const [_KULLANICIID, fKullaniciId] = useState(null);
 
@@ -77,42 +85,13 @@ const avatarurl_cek = async ({ kullaniciid }) => {
   }
 };
 
-const yorum_ekle = async (e) => {
-  if(!_KULLANICIID)
-    navigate("/giris");
-try { //SERVER ILE HABERLESME
-      const yanit = await fetch('http://localhost:5000/api/ilanyorumlari', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sahipid: _KULLANICIID, yorum: yeniYorum, ilanid: ilanid }),
-      });
-      
-      if (yanit.status === 200) {
-     alert('yorum eklendi');
-      } else{
-     alert('hata');
-      }
-    } catch (hata) {
-   alert('hata');
+useEffect(() => {
+    if (teklifAdim === 2 && fiyatInputRef.current) {
+      fiyatInputRef.current.focus();
+      // dilersen mevcut metni seçmek için:
+      fiyatInputRef.current.select();
     }
-};
-
-  useEffect(() => {
-      const tokenKontrol = async() =>{
-const token = localStorage.getItem('token');
-if (token) {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    fKullaniciId(payload.kullaniciid);
-  } catch (error) {
-    console.error('Token parsing error:', error);
-    // Token bozuksa temizleyebilirsin
-    localStorage.removeItem('token');
-  }
-}
-    }; tokenKontrol();
+  }, [teklifAdim]);
 
   const ilanyorumlarini_cek = async () => {
     try {
@@ -140,6 +119,20 @@ if (token) {
       console.error(err);
     }
   };
+  useEffect(() => {
+      const tokenKontrol = async() =>{
+const token = localStorage.getItem('token');
+if (token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    fKullaniciId(payload.kullaniciid);
+  } catch (error) {
+    console.error('Token parsing error:', error);
+    // Token bozuksa temizleyebilirsin
+    localStorage.removeItem('token');
+  }
+}
+    }; tokenKontrol();
 
   ilanyorumlarini_cek();
 }, [ilanid]);
@@ -213,6 +206,236 @@ if (token) {
     );
   };
 
+  // Teklif Verme Modalı Bileşeni
+  const TeklifModal = ({ kapat }) => {
+    const gunlukFiyat = ilan?.fiyat ? parseFloat(ilan.fiyat) : 0;
+    const [toplamGun, toplamGunAyarla] = useState(0);
+    const [toplamFiyat, toplamFiyatAyarla] = useState(0);
+    
+    // Tarih kontrolü ve fiyat hesaplama
+    useEffect(() => {
+      if (baslangicTarihi && bitisTarihi) {
+        const baslangic = new Date(baslangicTarihi);
+        const bitis = new Date(bitisTarihi);
+        
+        // Geçerli tarih kontrolü
+        if (baslangic > bitis) {
+          alert('Bitiş tarihi başlangıç tarihinden önce olamaz!');
+          bitisTarihiAyarla('');
+          return;
+        }
+        
+        // Gün sayısı hesaplama (ms -> gün)
+        const fark = bitis - baslangic;
+        const gunSayisi = Math.ceil(fark / (1000 * 60 * 60 * 24)) + 1; // Başlangıç günü dahil
+        
+        toplamGunAyarla(gunSayisi);
+        // Eğer teklifFiyati girilmediyse otomatik fiyat hesapla
+          // Hesaplanan toplam fiyat (gösterim için)
+        const hesaplananFiyat = gunlukFiyat * gunSayisi;
+        toplamFiyatAyarla(hesaplananFiyat);
+        
+       
+      }
+    }, [baslangicTarihi, bitisTarihi, teklifFiyati, gunlukFiyat]);
+    
+    // Teklif gönderme fonksiyonu
+    const teklifGonder = async () => {
+    const today = new Date();
+    const baslangic = new Date(baslangicTarihi);
+    const bitis = new Date(bitisTarihi);
+      if (!baslangicTarihi || !bitisTarihi) {
+        alert('Lütfen geçerli tarihler seçin!');
+        return;
+      }
+      
+      if (!teklifFiyati || parseFloat(teklifFiyati) <= 0) {
+        alert('Lütfen geçerli bir teklif fiyatı girin!');
+        return;
+      }
+      
+      if (!_KULLANICIID) {
+        alert('Teklif vermek için giriş yapmanız gerekiyor!');
+        navigate('/giris');
+        return;
+      }
+      
+      try {
+        // Burada gerçek API'ye teklif gönderme işlemini yapabilirsiniz
+        // Örnek:
+        
+        const yanit = await fetch('http://localhost:5000/api/teklifler', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ilanid: ilanid,
+            kullaniciid: _KULLANICIID,
+            baslangic_tarihi: baslangicTarihi,
+            bitis_tarihi: bitisTarihi,
+            teklif_fiyati: parseFloat(teklifFiyati)
+          }),
+        });
+        
+        if (yanit.ok) {
+          alert('Teklifiniz başarıyla gönderildi!');
+          kapat();
+        } else {
+          alert('Teklifiniz gönderilirken bir hata oluştu.');
+        }
+        
+        /*
+        // API bağlantısı yoksa geçici olarak:
+        alert('Teklifiniz başarıyla gönderildi!');
+        kapat();
+        */
+
+        // State'leri temizle
+        baslangicTarihiAyarla('');
+        bitisTarihiAyarla('');
+        teklifFiyatiAyarla('');
+        teklifAdimAyarla(1);
+      } catch (hata) {
+        console.error('Teklif gönderme hatası:', hata);
+        alert('Bir hata oluştu, lütfen tekrar deneyin.');
+      }
+    };
+    
+    // Minimum tarih değeri (bugün)
+    const bugun = new Date().toISOString().split('T')[0];
+    
+    return (
+      <div className="teklif-modal-overlay" onClick={kapat}>
+        <div className="teklif-modal" onClick={e => e.stopPropagation()}>
+          <div className="teklif-modal-header">
+            <h2>{teklifAdim === 1 ? 'Tarih Seçimi' : 'Fiyat Teklifi'}</h2>
+            <span className="teklif-modal-kapat" onClick={kapat}>&times;</span>
+          </div>
+          
+          <div className="teklif-modal-content">
+            {teklifAdim === 1 ? (
+              // Tarih seçim adımı
+              <div className="tarih-secim-container">
+                <div className="tarih-input-group">
+                  <label htmlFor="baslangic-tarihi">Başlangıç Tarihi:</label>
+                  <input
+                    type="date"
+                    id="baslangic-tarihi"
+                    min={bugun}
+                    value={baslangicTarihi}
+                    onChange={e => baslangicTarihiAyarla(e.target.value)}
+                    required
+                  />
+                </div>
+                
+                <div className="tarih-input-group">
+                  <label htmlFor="bitis-tarihi">Bitiş Tarihi:</label>
+                  <input
+                    type="date"
+                    id="bitis-tarihi"
+                    min={baslangicTarihi || bugun}
+                    value={bitisTarihi}
+                    onChange={e => bitisTarihiAyarla(e.target.value)}
+                    required
+                  />
+                </div>
+                
+                {baslangicTarihi && bitisTarihi && (
+                  <div className="tarih-bilgisi">
+                    <p>Seçilen Toplam Gün: <strong>{toplamGun}</strong></p>
+                    <p>Hesaplanan Toplam Fiyat: <strong>{(gunlukFiyat * toplamGun).toLocaleString('tr-TR')} TL</strong></p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Fiyat teklifi adımı
+              <div className="fiyat-teklif-container">
+                <div className="tarih-ozeti">
+                  <p><strong>Seçilen Tarih Aralığı:</strong> {new Date(baslangicTarihi).toLocaleDateString('tr-TR')} - {new Date(bitisTarihi).toLocaleDateString('tr-TR')}</p>
+                  <p><strong>Toplam Gün:</strong> {toplamGun}</p>
+                  <p><strong>Normal Fiyat:</strong> {(gunlukFiyat * toplamGun).toLocaleString('tr-TR')} TL</p>
+                </div>
+                
+                <div className="fiyat-input-group">
+                  <label htmlFor="teklif-fiyati">Teklif Edilecek Fiyat (TL):</label>
+               <input
+                  type="number"
+                  id="teklif-fiyati"
+                  min="1"
+                  value={teklifFiyati}
+                  onChange={e => teklifFiyatiAyarla(e.target.value)}
+                  ref = {fiyatInputRef}
+                  required
+                />
+                </div>
+                
+                {teklifFiyati && (
+                  <div className="teklif-bilgisi">
+                    <p>
+                      <strong>Normal Fiyata Göre:</strong> {' '}
+                      {parseFloat(teklifFiyati) < (gunlukFiyat * toplamGun) ? (
+                        <span className="indirimli-fiyat">
+                          %{(100 - (parseFloat(teklifFiyati) / (gunlukFiyat * toplamGun) * 100)).toFixed(2)} İndirimli
+                        </span>
+                      ) : parseFloat(teklifFiyati) > (gunlukFiyat * toplamGun) ? (
+                        <span className="arttirilmis-fiyat">
+                          %{((parseFloat(teklifFiyati) / (gunlukFiyat * toplamGun) * 100) - 100).toFixed(2)} Fazla
+                        </span>
+                      ) : (
+                        <span>Standart Fiyat</span>
+                      )}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          <div className="teklif-modal-footer">
+            {teklifAdim === 1 ? (
+              <>
+                <button 
+                  className="teklif-iptal-btn" 
+                  onClick={kapat}
+                >
+                  İptal
+                </button>
+                <button 
+                  className="teklif-devam-btn" 
+                  onClick={() => {
+                    if (!baslangicTarihi || !bitisTarihi) {
+                      alert('Lütfen geçerli tarihler seçin!');
+                      return;
+                    }
+                    teklifAdimAyarla(2);
+                  }}
+                >
+                  Devam Et
+                </button>
+              </>
+            ) : (
+              <>
+                <button 
+                  className="teklif-geri-btn" 
+                  onClick={() => teklifAdimAyarla(1)}
+                >
+                  Geri
+                </button>
+                <button 
+                  className="teklif-gonder-btn" 
+                  onClick={teklifGonder}
+                >
+                  Teklif Gönder
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     const ilaniGetir = async () => {
       try {
@@ -281,6 +504,7 @@ if (token) {
 
 
 // Fiyat hesaplama fonksiyonu
+// Fiyat hesaplama fonksiyonu
 const fiyatHesapla = (tip) => {
   if (!ilan || !ilan.fiyat) return 'Fiyat belirtilmemiş';
   
@@ -290,9 +514,25 @@ const fiyatHesapla = (tip) => {
     case 'gunluk':
       return `${gunlukFiyat.toLocaleString('tr-TR')} TL`;
     case 'haftalik':
-      return `${(gunlukFiyat * 7).toLocaleString('tr-TR')} TL`;
+      // Haftalık için indirim yapılmış mı kontrolü
+      const normalHaftalik = gunlukFiyat * 7;
+      const haftalikFiyat = normalHaftalik - 100; // Örnek indirim: 100 TL
+      return `${haftalikFiyat.toLocaleString('tr-TR')} TL`;
     case 'aylik':
-      return `${(gunlukFiyat * 30).toLocaleString('tr-TR')} TL`;
+      // Aylık için indirim yapılmış mı kontrolü
+      const normalAylik = gunlukFiyat * 30;
+      const aylikFiyat = normalAylik - 500; // Örnek indirim: 500 TL
+      return `${aylikFiyat.toLocaleString('tr-TR')} TL`;
+    case 'haftalikIndirim':
+      // Haftalık indirimi hesapla
+      const haftalikNormal = gunlukFiyat * 7;
+      const haftalikIndirimliFiyat = haftalikNormal - 100; // Örnek indirim: 100 TL
+      return haftalikNormal - haftalikIndirimliFiyat;
+    case 'aylikIndirim':
+      // Aylık indirimi hesapla
+      const aylikNormal = gunlukFiyat * 30;
+      const aylikIndirimliFiyat = aylikNormal - 500; // Örnek indirim: 500 TL
+      return aylikNormal - aylikIndirimliFiyat;
     default:
       return `${gunlukFiyat.toLocaleString('tr-TR')} TL`;
   }
@@ -307,33 +547,50 @@ const fiyatHesapla = (tip) => {
   // Teklif verme fonksiyonu
   const teklifVer = (e) => {
     e.preventDefault();
-    alert('Teklifiniz iletildi!');
+    // Teklif modalını aç
+    teklifModalAcikAyarla(true);
   };
 
   // Yorum ekleme fonksiyonu
-  const yorumEkle = (e) => {
-
+  const yorumEkle = async (e) => {
     e.preventDefault();
+
     if (yeniYorum.trim() === '') {
       alert('Lütfen bir yorum yazınız!');
       return;
     }
-    /*
-    // Yeni yorumu ekle
-    const yeniYorumObjesi = {
-      id: yorumlar.length + 1,
-      kullaniciAdi: 'Kullanıcı', // Gerçek uygulamada oturum açmış kullanıcı adı gelecek
-      tarih: new Date().toLocaleDateString('tr-TR'),
-      yorum: yeniYorum
-    };
-    
-    yorumlarAyarla([...yorumlar, yeniYorumObjesi]);
-    yeniYorumAyarla(''); // Yorum alanını temizle
-    */
 
-    // Gerçek uygulamada bu noktada API'a yorum gönderilir
+    if (!_KULLANICIID) {
+      navigate("/giris");
+      return;
+    }
+
+    try {
+      const yanit = await fetch('http://localhost:5000/api/ilanyorumlari', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sahipid: _KULLANICIID,
+          yorum: yeniYorum,
+          ilanid: ilanid
+        }),
+      });
+
+      if (yanit.status === 200) {
+        alert('Yorum başarıyla eklendi.');
+        yeniYorumAyarla(''); // input temizlensin
+        // yorumları yeniden çek
+        await ilanyorumlarini_cek(); 
+      } else {
+        alert('Yorum eklenirken bir hata oluştu.');
+      }
+    } catch (hata) {
+      alert('Sunucu hatası!');
+      console.error(hata);
+    }
   };
-
   
   if (yukleniyor) return <div className="yukleme">Yükleniyor...</div>;
   if (hata) return <div className="hata">{hata}</div>;
@@ -350,6 +607,19 @@ const fiyatHesapla = (tip) => {
           resimler={ilan.resimler} 
           baslangicIndex={modalResimIndex}
           kapat={() => modalAcikAyarla(false)}
+        />
+      )}
+      
+      {/* Teklif Verme Modalı */}
+      {teklifModalAcik && (
+        <TeklifModal 
+          kapat={() => {
+            teklifModalAcikAyarla(false);
+            teklifAdimAyarla(1); // Modal kapanınca adım 1'e dön
+            baslangicTarihiAyarla('');
+            bitisTarihiAyarla('');
+            teklifFiyatiAyarla('');
+          }}
         />
       )}
       
@@ -452,15 +722,22 @@ const fiyatHesapla = (tip) => {
       <div className="price-types-display">
         <div className="price-type-item">
           <div className="price-type-label">Günlük</div>
-          <div className="price-type-value">{fiyatHesapla('gunluk')}</div>
+          <div className="price-type-value">{fiyatHesapla('gunluk').metin}</div>
         </div>
         <div className="price-type-item">
           <div className="price-type-label">Haftalık</div>
-          <div className="price-type-value">{fiyatHesapla('haftalik')}</div>
+          <div className="price-type-value">{fiyatHesapla('haftalik').metin}</div>
+              <div className="gunluk-esdeger">
+              (Günlük {Math.round(fiyatHesapla('haftalik').deger / 7).toLocaleString('tr-TR')} TL)
+                  </div>
         </div>
+
         <div className="price-type-item">
           <div className="price-type-label">Aylık</div>
-          <div className="price-type-value">{fiyatHesapla('aylik')}</div>
+          <div className="price-type-value">{fiyatHesapla('aylik').metin}</div>
+           <div className="gunluk-esdeger">
+            (Günlük {Math.round(fiyatHesapla('aylik').deger / 30).toLocaleString('tr-TR')} TL)
+                  </div>
         </div>
       </div>
     </div>
@@ -478,44 +755,57 @@ const fiyatHesapla = (tip) => {
         </div>
       </div>
 
-      {/* Tab sistemi */}
-      <div className="ilan-tabs">
-        <div 
-          className={`tab ${aktifSekme === 'yorumlar' ? 'active' : ''}`}
-          onClick={() => sekmeDegistir('yorumlar')}
-        >
-          Kullanıcı Yorumları
-        </div>
-      </div>
 
       {/* Tab içeriği */}
       <div className="tab-content">
         <div className="yorumlar-content">
           <h3>Kullanıcı Yorumları</h3>
           
-          {/* Yorumlar listesi */}
-          <div className="comments">
-            {_ILANYORUMLARI.length > 0 ? (
-              _ILANYORUMLARI.map((yorum) => (
-                <div className="comment-item" key={`comment-${yorum.sahipid}`}>
-                  <div className="comment-header">
-                    <strong>{yorum.ad}</strong>
+        {/* Yorumlar listesi - Geliştirilmiş versiyon */}
+      <div className="comments">
+        {_ILANYORUMLARI.length > 0 ? (
+          _ILANYORUMLARI.map((yorum) => (
+            <div className="comment-item" key={`comment-${yorum.sahipid}`}>
+              <div className="comment-header">
+                <div className="comment-user-info">
+                  {/* Kullanıcı avatarı */}
+                  <div className="comment-avatar">
+                    {yorum.avatar ? (
+                      <img 
+                        src={yorum.avatar} 
+                        alt={`${yorum.ad} profil resmi`}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.parentNode.innerHTML = `<div class="avatar-placeholder">${yorum.ad ? yorum.ad.charAt(0).toUpperCase() : '?'}</div>`;
+                        }} 
+                      />
+                    ) : (
+                      <div className="avatar-placeholder">
+                        {yorum.ad ? yorum.ad.charAt(0).toUpperCase() : '?'}
+                      </div>
+                    )}
+                  </div>
+                  {/* Kullanıcı adı ve tarihi */}
+                  <div className="comment-user-details">
+                    <strong className="comment-username">{yorum.ad}</strong>
                     <span className="comment-date">{yorum.tarih}</span>
                   </div>
-                  <div className="comment-text">
-                    {yorum.yorum}
-                  </div>
                 </div>
-              ))
-            ) : (
-              <p>Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
-            )}
-          </div>
+              </div>
+              <div className="comment-text">
+                {yorum.yorum}
+              </div>
+            </div>
+          ))
+        ) : (
+          <p>Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
+        )}
+      </div>
           
           {/* Yorum form */}
           <div className="comment-form">
             <h4>Yorum Yap</h4>
-            <form onSubmit={yorum_ekle}>
+            <form onSubmit={yorumEkle}>
               <textarea 
                 value={yeniYorum}
                 onChange={(e) => yeniYorumAyarla(e.target.value)}
