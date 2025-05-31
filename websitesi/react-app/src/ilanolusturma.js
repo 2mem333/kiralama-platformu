@@ -56,7 +56,7 @@ navigate("/giris");
         },);
 //--------------FIREBASE CONFIG---------------------- !BU CONGIF SERVER TARAFINA TASINMALIDIR, GUVENLIK AMACLI
   const firebaseConfig = {
-    apiKey: "AIzaSyDMLIXsdKpDhhEDXQiYWXZWRTS1-FCOdcI",
+    apiKey: "aynenkanzi",
     authDomain: "kiralama-platformu.firebaseapp.com",
     projectId: "kiralama-platformu",
     storageBucket: "kiralama-platformu.firebasestorage.app",
